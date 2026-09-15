@@ -1,5 +1,7 @@
 # Personal Wealth Calculator
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?repository-url=https%3A%2F%2Fgithub.com%2Fibazza3393%2Fpersonal-wealth-calculator)
+
 A clean, single-page Personal Wealth Calculator built with Next.js App Router. Runs **entirely local-first** — all data and calculations stay in your browser.
 
 ## Features
