@@ -1,25 +1,16 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-});
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Personal Wealth Calculator",
-  description: "Calculate your net worth privately. All data is stored locally in your browser. Nothing leaves your device.",
-  icons: {
-    icon: "/vercel.svg", // keep default or replace later
-  },
+  title: 'Wealth',
+  description:
+    'Private net worth calculator. All figures stay in this browser — nothing is uploaded.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#f5f5f7',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -28,10 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50">
-        {children}
-      </body>
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

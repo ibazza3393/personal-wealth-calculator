@@ -23,3 +23,5 @@ export const DEFAULT_WEALTH_DATA: WealthData = {
   marketAssets: [],
   liabilities: [],
 };
+
+export const STORAGE_KEY = 'personal-wealth-data';
