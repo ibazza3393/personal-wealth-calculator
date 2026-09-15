@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Wealth Calculator
 
-## Getting Started
+A clean, single-page Personal Wealth Calculator built with Next.js App Router. Runs **entirely local-first** — all data and calculations stay in your browser.
 
-First, run the development server:
+## Features
+
+- **Private by Design**: All calculations and storage happen client-side. No data ever leaves your browser.
+- **Robust LocalStorage Hook**: Custom `useLocalStorage` hook with proper hydration safety to prevent Next.js SSR layout shifts.
+- **Input Categories**:
+  - Liquid Cash
+  - Property Value
+  - Market Assets (dynamic list of portfolios/stocks)
+  - Liabilities (dynamic list of loans/credit cards)
+- **Instant Calculations**: Net worth, total assets, total liabilities, asset composition bars — all computed in React state.
+- **Auto-persist**: Changes are saved automatically to browser LocalStorage.
+- **Demo Data & Backup**: Load example numbers or download a JSON backup.
+- **Vercel Ready**: Standard setup — deploy instantly with `git push`.
+
+## Tech Stack
+
+- Next.js 16 (App Router + Turbopack)
+- TypeScript
+- Tailwind CSS
+- Lucide icons (minimal)
+- Pure React (no external state libs)
+
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Push this repo to GitHub / GitLab / Bitbucket.
+2. Import the project in [Vercel](https://vercel.com).
+3. Deploy — no environment variables or extra config needed.
 
-## Learn More
+The project includes a standard `.gitignore` and builds cleanly for static + serverless deployment.
 
-To learn more about Next.js, take a look at the following resources:
+## Data Privacy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Uses a custom `useLocalStorage` hook (`lib/useLocalStorage.ts`).
+- All math (totals, net worth, percentages) runs in the component using React state.
+- Data key: `personal-wealth-data` in LocalStorage.
+- Use the **Clear All Data** button to wipe everything.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+app/
+  layout.tsx          # Root layout + metadata
+  page.tsx            # Main calculator UI (client component)
+  globals.css         # Custom styles
+lib/
+  useLocalStorage.ts  # Hydration-safe localStorage hook
+  types.ts            # WealthData, AssetItem, LiabilityItem
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Designed as a single-page experience.
+- Number inputs support decimals.
+- Net worth turns green (positive) or red (negative).
+- Fully responsive.
+
+Built for privacy and simplicity.
