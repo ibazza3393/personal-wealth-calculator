@@ -40,8 +40,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { title, sub } = titles(pathname);
 
   return (
-    <div className="origin-shell">
-      <aside className="origin-sidebar">
+    <>
+      <div className="lg-scene" aria-hidden>
+        <span className="lg-orb lg-orb-a" />
+        <span className="lg-orb lg-orb-b" />
+        <span className="lg-orb lg-orb-c" />
+      </div>
+      <div className="origin-shell">
+      <aside className="origin-sidebar glass">
         <Link href="/" className="origin-logo">
           Wealth
         </Link>
@@ -80,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="origin-body">
-        <header className="origin-topbar">
+        <header className="origin-topbar glass">
           <div>
             <p className="origin-kicker">Planning</p>
             <h1>{title}</h1>
@@ -112,7 +118,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <nav className="origin-mobile-nav" aria-label="Pages">
+        <div className="origin-content">{children}</div>
+
+        <nav className="origin-mobile-nav glass" aria-label="Pages">
           {LINKS.map((link) => {
             const active = pathname === link.href;
             return (
@@ -122,9 +130,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-
-        <div className="origin-content">{children}</div>
       </div>
     </div>
+    </>
   );
 }

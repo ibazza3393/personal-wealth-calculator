@@ -35,11 +35,11 @@ export function WealthCard() {
         onPointerLeave={reset}
       >
         <div className="wealth-card-shine pointer-events-none absolute inset-0" />
-        <div className="relative flex h-full flex-col justify-between">
-          <p className="text-[12px] font-semibold tracking-[0.16em] text-[var(--label)]/50">WEALTH</p>
+        <div className="relative flex h-full flex-col justify-between text-white">
+          <p className="text-[12px] font-semibold tracking-[0.16em] text-white/50">WEALTH</p>
           <div>
             <p className="text-[15px] font-medium">Personal</p>
-            <p className="text-[13px] text-[var(--secondary)]">Private holdings · live markets</p>
+            <p className="text-[13px] text-white/70">Private holdings · live markets</p>
           </div>
         </div>
       </div>
