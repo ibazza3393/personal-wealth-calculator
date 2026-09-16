@@ -6,7 +6,7 @@ import { useWealth } from '@/components/WealthProvider';
 export default function ComparePage() {
   const { data, patch, isHydrated } = useWealth();
   return (
-    <main className="mx-auto max-w-[1100px] px-5 pb-20 pt-4">
+    <main className="mx-auto max-w-[1100px] px-4 pt-2 sm:px-5">
       <ComparePaths
         value={data.compare}
         hydrated={isHydrated}

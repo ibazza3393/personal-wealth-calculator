@@ -75,7 +75,7 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-pressed={dark}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="text-[13px] text-[var(--blue)]"
+      className="hit text-[13px] text-[var(--blue)]"
     >
       {dark ? 'Light' : 'Dark'}
     </button>

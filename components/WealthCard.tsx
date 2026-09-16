@@ -16,12 +16,14 @@ export function WealthCard() {
     el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
     el.style.setProperty('--shine-x', `${px * 100}%`);
     el.style.setProperty('--shine-y', `${py * 100}%`);
+    el.classList.add('is-tilting');
   };
 
   const reset = () => {
     const el = card.current;
     if (!el) return;
-    el.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    el.style.transform = '';
+    el.classList.remove('is-tilting');
   };
 
   return (

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { AppNav } from '@/components/AppNav';
+import { AppShell } from '@/components/AppShell';
 import { WealthProvider } from '@/components/WealthProvider';
 
 export const metadata: Metadata = {
@@ -14,6 +14,7 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: light)', color: '#f5f5f7' },
     { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
+  viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,
 };
@@ -32,8 +33,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <WealthProvider>
-          <AppNav />
-          <div className="flex-1">{children}</div>
+          <AppShell>{children}</AppShell>
         </WealthProvider>
       </body>
     </html>

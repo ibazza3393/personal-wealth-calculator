@@ -38,7 +38,7 @@ export default function HoldingsPage() {
     }));
 
   return (
-    <main className="mx-auto max-w-[980px] px-5 pb-20 pt-8">
+    <main className="mx-auto max-w-[980px] px-4 pt-6 sm:px-5">
       <h1 className="text-[28px] font-semibold tracking-tight">Holdings</h1>
       <p className="mt-1 max-w-xl text-[15px] text-[var(--secondary)]">
         Tickers and units mark to market. Your list never leaves this browser — only public prices are fetched.
