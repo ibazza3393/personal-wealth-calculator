@@ -9,7 +9,9 @@ A local-first net worth dashboard. All figures stay in this browser.
 - **Private by design** — calculations and storage run only on the client.
 - **Hydration-safe storage** — `useSyncExternalStore` so SSR HTML matches the first client pass; saved figures load after mount without crashing on a bad JSON blob.
 - **Integer-cent math** — assets and liabilities are summed in cents, then formatted. `$0.10 + $0.20` is `$0.30`.
-- **Inputs** — liquid cash, property, market portfolios, loans/cards.
+- **Inputs** — cash, property, stocks, bitcoin, other crypto, bonds, funds, retirement, business, loans.
+- **Dark mode** — follows the system, with a Light/Dark toggle (saved locally).
+- **Compare paths** — Housing vs Renting vs S&P 500, same capital and monthly budget. Illustrative, not advice.
 - **Auto-save** — every change writes to `localStorage` under `personal-wealth-data`.
 - **Sample data, JSON backup, clear**.
 
