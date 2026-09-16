@@ -9,6 +9,7 @@ import { useWealth } from '@/components/WealthProvider';
 const LINKS = [
   { href: '/', label: 'Overview' },
   { href: '/holdings', label: 'Holdings' },
+  { href: '/spend', label: 'Spend' },
   { href: '/compare', label: 'Compare' },
   { href: '/markets', label: 'Markets' },
 ];
@@ -41,6 +42,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
+      <div className="scene" aria-hidden>
+        <div className="orb orb-a" />
+        <div className="orb orb-b" />
+        <div className="orb orb-c" />
+      </div>
       <aside className="app-rail glass sticky top-0 h-dvh flex-col items-center gap-2 px-2 py-6">
         <Link href="/" className="mb-4 text-[13px] font-semibold tracking-tight">
           W

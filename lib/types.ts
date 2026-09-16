@@ -24,6 +24,28 @@ export interface LiabilityItem {
   value: number;
 }
 
+export type ExpenseKind =
+  | 'housing'
+  | 'food'
+  | 'transport'
+  | 'utilities'
+  | 'insurance'
+  | 'subs'
+  | 'health'
+  | 'other';
+
+export interface ExpenseItem {
+  id: string;
+  kind: ExpenseKind;
+  name: string;
+  amount: number;
+}
+
+export interface Budget {
+  monthlyIncome: number;
+  items: ExpenseItem[];
+}
+
 export interface CompareInputs {
   years: number;
   lumpSum: number;
@@ -44,6 +66,7 @@ export interface WealthData {
   holdings: Holding[];
   liabilities: LiabilityItem[];
   compare: CompareInputs;
+  budget: Budget;
 }
 
 export const DEFAULT_COMPARE: CompareInputs = {
@@ -59,6 +82,11 @@ export const DEFAULT_COMPARE: CompareInputs = {
   spReturnPct: 10,
 };
 
+export const DEFAULT_BUDGET: Budget = {
+  monthlyIncome: 0,
+  items: [],
+};
+
 export const DEFAULT_WEALTH_DATA: WealthData = {
   currency: 'USD',
   liquidCash: 0,
@@ -66,6 +94,7 @@ export const DEFAULT_WEALTH_DATA: WealthData = {
   holdings: [],
   liabilities: [],
   compare: DEFAULT_COMPARE,
+  budget: DEFAULT_BUDGET,
 };
 
 export const STORAGE_KEY = 'personal-wealth-data';
@@ -140,4 +169,20 @@ export const HOLDING_GROUPS: {
     empty: 'No business equity yet',
     color: '#ff9f0a',
   },
+];
+
+export const EXPENSE_GROUPS: {
+  kind: ExpenseKind;
+  title: string;
+  bucket: 'need' | 'want';
+  color: string;
+}[] = [
+  { kind: 'housing', title: 'Housing', bucket: 'need', color: '#ffd60a' },
+  { kind: 'utilities', title: 'Utilities', bucket: 'need', color: '#64d2ff' },
+  { kind: 'food', title: 'Food', bucket: 'want', color: '#ff9f0a' },
+  { kind: 'transport', title: 'Transport', bucket: 'need', color: '#5e5ce6' },
+  { kind: 'insurance', title: 'Insurance', bucket: 'need', color: '#8e8e93' },
+  { kind: 'health', title: 'Health', bucket: 'need', color: '#30d158' },
+  { kind: 'subs', title: 'Subscriptions', bucket: 'want', color: '#bf5af2' },
+  { kind: 'other', title: 'Other', bucket: 'want', color: '#98989d' },
 ];

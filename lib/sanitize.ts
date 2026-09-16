@@ -1,11 +1,14 @@
 import type {
+  Budget,
   CompareInputs,
+  ExpenseItem,
+  ExpenseKind,
   Holding,
   HoldingKind,
   LiabilityItem,
   WealthData,
 } from './types';
-import { DEFAULT_COMPARE, DEFAULT_WEALTH_DATA } from './types';
+import { DEFAULT_BUDGET, DEFAULT_COMPARE, DEFAULT_WEALTH_DATA } from './types';
 import { centsToDollars, toCents } from './money';
 import { isCurrency } from './currency';
 
@@ -21,6 +24,17 @@ const KINDS = new Set<HoldingKind>([
   'funds',
   'retirement',
   'business',
+]);
+
+const EXPENSE_KINDS = new Set<ExpenseKind>([
+  'housing',
+  'food',
+  'transport',
+  'utilities',
+  'insurance',
+  'subs',
+  'health',
+  'other',
 ]);
 
 function sanitizeName(name: unknown): string {
@@ -85,6 +99,20 @@ function sanitizeLiability(raw: unknown, fallbackId: string): LiabilityItem | nu
   return { id, name: name || 'Untitled', value };
 }
 
+function sanitizeExpense(raw: unknown, fallbackId: string): ExpenseItem | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  const name = sanitizeName(row.name);
+  const amount = sanitizeAmount(row.amount);
+  const kind: ExpenseKind = EXPENSE_KINDS.has(row.kind as ExpenseKind)
+    ? (row.kind as ExpenseKind)
+    : 'other';
+  const id =
+    typeof row.id === 'string' && row.id.length > 0 && row.id.length <= 64 ? row.id : fallbackId;
+  if (!name && amount === 0) return null;
+  return { id, kind, name: name || 'Untitled', amount };
+}
+
 function sanitizeCompare(raw: unknown): CompareInputs {
   const d = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   return {
@@ -98,6 +126,22 @@ function sanitizeCompare(raw: unknown): CompareInputs {
     rentMonthly: sanitizeAmount(d.rentMonthly ?? DEFAULT_COMPARE.rentMonthly),
     rentInflationPct: clampNum(d.rentInflationPct, DEFAULT_COMPARE.rentInflationPct, 0, 20),
     spReturnPct: clampNum(d.spReturnPct, DEFAULT_COMPARE.spReturnPct, -20, 30),
+  };
+}
+
+function sanitizeBudget(raw: unknown): Budget {
+  const d = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const items = uniqueIds(
+    Array.isArray(d.items)
+      ? d.items
+          .map((row, i) => sanitizeExpense(row, `exp-${i}`))
+          .filter((x): x is ExpenseItem => x !== null)
+          .slice(0, MAX_ITEMS)
+      : [],
+  );
+  return {
+    monthlyIncome: sanitizeAmount(d.monthlyIncome ?? DEFAULT_BUDGET.monthlyIncome),
+    items,
   };
 }
 
@@ -132,5 +176,6 @@ export function sanitizeWealthData(raw: unknown): WealthData {
     holdings,
     liabilities,
     compare: sanitizeCompare(d.compare),
+    budget: sanitizeBudget(d.budget),
   };
 }
