@@ -171,6 +171,9 @@ export function sanitizeWealthData(raw: unknown): WealthData {
 
   return {
     currency: isCurrency(d.currency) ? d.currency : 'USD',
+    taxRegion: d.taxRegion === 'AU' || d.taxRegion === 'NZ' ? d.taxRegion : 'NZ',
+    taxIncome: sanitizeAmount(d.taxIncome),
+    taxDeductions: sanitizeAmount(d.taxDeductions),
     liquidCash: sanitizeAmount(d.liquidCash),
     propertyValue: sanitizeAmount(d.propertyValue),
     holdings,

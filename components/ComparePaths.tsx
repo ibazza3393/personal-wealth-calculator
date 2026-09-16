@@ -20,16 +20,14 @@ export function ComparePaths({
 }) {
   const { columns, rows } = runCompare(value, currency);
   const best = Math.max(...columns.map((p) => p.endingCents));
-
   const patch = (partial: Partial<CompareInputs>) => onChange({ ...value, ...partial });
 
   return (
-    <section className="mt-12">
+    <section className="mt-6">
       <div className="px-1">
         <h2 className="text-[28px] font-semibold tracking-tight">Compare paths</h2>
         <p className="mt-1 max-w-xl text-[15px] leading-relaxed text-[var(--secondary)]">
-          Same starting capital and monthly budget. Housing buys a home. Renting invests what is left
-          after rent. S&amp;P 500 invests the cash instead. Illustrative — not advice.
+          Same starting capital and monthly budget. Illustrative — not advice.
         </p>
       </div>
 
@@ -121,42 +119,36 @@ export function ComparePaths({
         />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-[20px] bg-[var(--elevated)]">
-        <table className="w-full min-w-[720px] border-collapse text-[15px]">
-          <thead>
-            <tr className="border-b border-[var(--separator)]">
-              <th className="w-[22%] px-4 py-5 text-left text-[13px] font-semibold text-[var(--secondary)]">
-                After {value.years} years
-              </th>
-              {columns.map((p) => (
-                <th key={p.id} className="px-4 py-5 text-left align-bottom">
-                  <div className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--secondary)]">
-                    {p.title}
-                  </div>
-                  <div className="mt-1 min-h-[34px] text-[28px] font-semibold tracking-tight tabular-nums">
-                    {hydrated ? formatCents(p.endingCents, currency) : '—'}
-                  </div>
-                  <div className="mt-1 text-[13px] text-[var(--secondary)]">{p.subtitle}</div>
-                  {hydrated && p.endingCents === best && best > 0 && (
-                    <div className="mt-2 text-[13px] font-medium text-[var(--blue)]">Highest ending</div>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.label} className="border-b border-[var(--separator)] last:border-b-0">
-                <th className="px-4 py-3 text-left font-normal text-[var(--secondary)]">{row.label}</th>
-                {row.cells.map((cell, i) => (
-                  <td key={columns[i]?.id ?? i} className="px-4 py-3 tabular-nums tracking-tight">
-                    {hydrated ? cell : '—'}
-                  </td>
-                ))}
-              </tr>
+      <div className="compare-grid panel mt-6 overflow-x-auto rounded-[24px]">
+        <div className="compare-row compare-head">
+          <div className="compare-label text-[13px] font-medium text-[var(--secondary)]">
+            After {value.years} years
+          </div>
+          {columns.map((p) => (
+            <div key={p.id} className="compare-cell">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--secondary)]">
+                {p.title}
+              </p>
+              <p className="mt-1 text-[22px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[24px]">
+                {hydrated ? formatCents(p.endingCents, currency, 0) : '—'}
+              </p>
+              <p className="mt-1 min-h-[18px] text-[13px] text-[var(--secondary)]">{p.subtitle}</p>
+              <p className="mt-1 min-h-[18px] text-[13px] font-medium text-[var(--blue)]">
+                {hydrated && p.endingCents === best && best > 0 ? 'Highest ending' : '\u00a0'}
+              </p>
+            </div>
+          ))}
+        </div>
+        {rows.map((row) => (
+          <div key={row.label} className="compare-row">
+            <div className="compare-label text-[14px] text-[var(--secondary)]">{row.label}</div>
+            {row.cells.map((cell, i) => (
+              <div key={columns[i]?.id ?? i} className="compare-cell text-[15px] tabular-nums tracking-tight">
+                {hydrated ? cell : '—'}
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        ))}
       </div>
     </section>
   );

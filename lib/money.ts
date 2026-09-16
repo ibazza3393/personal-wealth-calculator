@@ -39,16 +39,21 @@ export function parseUnits(input: string): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-export function formatCents(cents: number, currency: CurrencyCode = 'USD'): string {
+export function formatCents(
+  cents: number,
+  currency: CurrencyCode = 'USD',
+  digits?: 0 | 2,
+): string {
   const dollars = (Number.isFinite(cents) ? cents : 0) / 100;
   const abs = Math.abs(dollars);
   const meta = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
-  const fractionDigits = currency === 'JPY' ? 0 : Number.isInteger(abs) ? 0 : 2;
+  const fractionDigits =
+    currency === 'JPY' ? 0 : digits ?? (Number.isInteger(abs) ? 0 : 2);
   return new Intl.NumberFormat(meta.locale, {
     style: 'currency',
     currency: meta.code,
     minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: currency === 'JPY' ? 0 : 2,
+    maximumFractionDigits: currency === 'JPY' ? 0 : digits ?? 2,
   }).format(dollars);
 }
 

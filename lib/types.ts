@@ -61,6 +61,9 @@ export interface CompareInputs {
 
 export interface WealthData {
   currency: CurrencyCode;
+  taxRegion: 'AU' | 'NZ';
+  taxIncome: number;
+  taxDeductions: number;
   liquidCash: number;
   propertyValue: number;
   holdings: Holding[];
@@ -89,6 +92,9 @@ export const DEFAULT_BUDGET: Budget = {
 
 export const DEFAULT_WEALTH_DATA: WealthData = {
   currency: 'USD',
+  taxRegion: 'NZ',
+  taxIncome: 0,
+  taxDeductions: 0,
   liquidCash: 0,
   propertyValue: 0,
   holdings: [],

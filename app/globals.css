@@ -297,6 +297,42 @@ input[type='number']::-webkit-inner-spin-button {
   min-width: 44px;
 }
 
+.compare-grid {
+  min-width: 740px;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  border-bottom: 0.5px solid var(--separator);
+}
+
+.compare-row:last-child {
+  border-bottom: 0;
+}
+
+.compare-label,
+.compare-cell {
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.compare-head .compare-cell {
+  min-height: 118px;
+}
+
+.skeleton {
+  background: color-mix(in srgb, var(--label) 8%, transparent);
+  border-radius: 12px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wealth-card,
   .rise,

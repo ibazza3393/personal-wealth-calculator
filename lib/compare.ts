@@ -69,7 +69,7 @@ export function futureValueMonthly(
 }
 
 function money(n: number, currency: CurrencyCode) {
-  return formatCents(toCents(Math.max(0, n)), currency);
+  return formatCents(toCents(Math.max(0, n)), currency, 0);
 }
 
 export function runCompare(input: CompareInputs, currency: CurrencyCode = 'USD'): CompareResult {
