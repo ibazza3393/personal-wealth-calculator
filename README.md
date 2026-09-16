@@ -2,7 +2,15 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?repository-url=https%3A%2F%2Fgithub.com%2Fibazza3393%2Fpersonal-wealth-calculator)
 
-A local-first net worth dashboard. All figures stay in this browser.
+A local-first NZ/AU net worth dashboard. Figures stay in this browser until you connect Akahu.
+
+## ANZ ledger (single user)
+
+Canonical tables live in `lib/domain.ts`. Overview shows a dual NZD/AUD snapshot from mock NZ (Akahu) + AU (CDR, consent expiring) + a Grey Lynn property. `/connections` is the pipe UI. Real bank OAuth is stubbed.
+
+KiwiSaver is **not** on official NZ open banking. This repo will not scrape provider logins. Use CSV/manual, or Akahu if they support your scheme as a classic connection. Sorted.org.nz scrapers only publish **public fund fees/returns**, not your balance.
+
+Hybrid: keep Next on Vercel (quotes API). Native is a Capacitor WebView of that URL — see `native/README.md`. Add to Home Screen works via `manifest.webmanifest`.
 
 ## What it does
 

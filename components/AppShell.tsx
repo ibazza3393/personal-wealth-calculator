@@ -9,6 +9,7 @@ import { useWealth } from '@/components/WealthProvider';
 const LINKS = [
   { href: '/', label: 'Overview' },
   { href: '/holdings', label: 'Holdings' },
+  { href: '/connections', label: 'Connections' },
   { href: '/spend', label: 'Spend' },
   { href: '/compare', label: 'Compare' },
   { href: '/markets', label: 'Markets' },
@@ -21,6 +22,8 @@ function titles(path: string) {
     sub:
       path === '/holdings'
         ? 'Accounts, tickers, and mark-to-market'
+        : path === '/connections'
+          ? 'NZ Akahu, AU open banking, manual property'
         : path === '/spend'
           ? 'Income, bills, and savings rate'
           : path === '/compare'

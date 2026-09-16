@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { AllocationRing } from '@/components/AllocationRing';
 import { CurrencyInput } from '@/components/CurrencyInput';
+import { ConsentBanner, LedgerStrip } from '@/components/LedgerStrip';
 import { WealthCard } from '@/components/WealthCard';
 import { useWealth } from '@/components/WealthProvider';
 import { budgetTotals } from '@/lib/budget';
@@ -68,6 +69,8 @@ export default function OverviewPage() {
 
   return (
     <main className="mx-auto max-w-[1100px] px-4 pt-6 sm:px-5">
+      <ConsentBanner />
+      <LedgerStrip />
       <section className="rise flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[13px] text-[var(--secondary)]">Net worth</p>

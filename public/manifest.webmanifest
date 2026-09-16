@@ -1,0 +1,17 @@
+{
+  "name": "Wealth",
+  "short_name": "Wealth",
+  "description": "Private NZ/AU net worth. Holdings stay on this device.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f7",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

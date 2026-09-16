@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AppShell } from '@/components/AppShell';
+import { LedgerProvider } from '@/components/LedgerProvider';
 import { WealthProvider } from '@/components/WealthProvider';
 
 export const metadata: Metadata = {
   title: 'Wealth',
   description:
-    'Private net worth dashboard with live Bitcoin and market quotes. Holdings stay in your browser.',
+    'Private NZ/AU net worth. Holdings stay in your browser. Banks via Akahu later — never passwords.',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Wealth',
+    statusBarStyle: 'default',
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,7 +40,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <WealthProvider>
-          <AppShell>{children}</AppShell>
+          <LedgerProvider>
+            <AppShell>{children}</AppShell>
+          </LedgerProvider>
         </WealthProvider>
       </body>
     </html>

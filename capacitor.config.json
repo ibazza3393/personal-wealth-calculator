@@ -1,0 +1,13 @@
+{
+  "appId": "nz.wealth.os",
+  "appName": "Wealth",
+  "webDir": "public",
+  "server": {
+    "url": "https://wealth-calculator-delta.vercel.app",
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile"
+  }
+}
