@@ -31,7 +31,7 @@ export default function OverviewPage() {
 
   if (!isHydrated) {
     return (
-      <main className="mx-auto max-w-[1100px] px-4 pt-8 sm:px-5">
+      <main className="pt-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="skeleton h-48" />
           <div className="skeleton h-48" />
@@ -68,13 +68,11 @@ export default function OverviewPage() {
   const topSpend = [...budget.items].sort((a, b) => b.amount - a.amount).slice(0, 3);
 
   return (
-    <main className="mx-auto max-w-[1100px] px-4 pt-6 sm:px-5">
-      <ConsentBanner />
-      <LedgerStrip />
-      <section className="rise flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
+    <main className="pt-4">
+      <section className="rise flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[13px] text-[var(--secondary)]">Net worth</p>
-          <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[56px]">
+          <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[48px]">
             {figure(netCents)}
           </p>
           {writeError && (
@@ -85,6 +83,11 @@ export default function OverviewPage() {
         </div>
         <WealthCard />
       </section>
+
+      <div className="mt-5">
+        <ConsentBanner />
+        <LedgerStrip />
+      </div>
 
       <div className="rise rise-1 mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi label="Assets" value={figure(assetCents)} />

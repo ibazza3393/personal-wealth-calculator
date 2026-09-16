@@ -31,7 +31,7 @@ export default function ConnectionsPage() {
 
   if (!isHydrated) {
     return (
-      <main className="mx-auto max-w-[920px] px-4 pt-6 sm:px-5">
+      <main className="pt-4">
         <div className="skeleton h-40" />
       </main>
     );
@@ -86,7 +86,7 @@ export default function ConnectionsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-[920px] px-4 pt-6 pb-16 sm:px-5">
+    <main className="pt-4 pb-16">
       <p className="mb-4 text-[13px] text-[var(--secondary)]">
         Single user, read-only. NZ Personal App is free on Akahu. Tokens stay in `.env.local`, never in the browser.
       </p>

@@ -8,7 +8,7 @@ export default function MarketsPage() {
   const { currency } = data;
 
   return (
-    <main className="mx-auto max-w-[980px] px-4 pt-6 sm:px-5">
+    <main className="pt-4">
       <h1 className="text-[28px] font-semibold tracking-tight">Markets</h1>
       <p className="mt-1 max-w-xl text-[15px] text-[var(--secondary)]">
         Public prices only — CoinGecko for crypto, Yahoo Finance for stocks. Your holdings are not sent.
