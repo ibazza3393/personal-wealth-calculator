@@ -3,39 +3,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #e8e4dc;
-  --elevated: #fffcf8;
-  --label: #1d1d1f;
-  --secondary: #6e6e73;
-  --tertiary: #86868b;
-  --separator: rgba(60, 60, 67, 0.12);
-  --blue: #0071e3;
-  --green: #248a3d;
-  --red: #de071c;
-  --ring-track: #e8e8ed;
-  --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-  --card-grad: linear-gradient(155deg, #fbfbfd 0%, #e8e8ed 48%, #d2d2d7 100%);
+  --bg: #f3f4f7;
+  --elevated: #ffffff;
+  --label: #111827;
+  --secondary: #6b7280;
+  --tertiary: #9ca3af;
+  --separator: #e5e7eb;
+  --blue: #4f46e5;
+  --green: #059669;
+  --red: #dc2626;
+  --ring-track: #e5e7eb;
+  --sidebar: #ffffff;
+  --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.04);
+  --card-grad: linear-gradient(155deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%);
   --safe-l: max(16px, env(safe-area-inset-left, 0px));
   --safe-r: max(16px, env(safe-area-inset-right, 0px));
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
-  --tab-h: 64px;
-  --fold-gap: 0px;
 }
 
 .dark {
-  --bg: #07080c;
-  --elevated: #16161a;
-  --label: #f5f5f7;
-  --secondary: #98989d;
-  --tertiary: #6e6e73;
-  --separator: rgba(84, 84, 88, 0.45);
-  --blue: #0a84ff;
-  --green: #30d158;
-  --red: #ff453a;
-  --ring-track: #3a3a3c;
-  --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-  --card-grad: linear-gradient(155deg, #3a3a3c 0%, #2c2c2e 48%, #1c1c1e 100%);
+  --bg: #0b0c10;
+  --elevated: #15171c;
+  --label: #f3f4f6;
+  --secondary: #9ca3af;
+  --tertiary: #6b7280;
+  --separator: #2a2d36;
+  --blue: #818cf8;
+  --green: #34d399;
+  --red: #f87171;
+  --ring-track: #2a2d36;
+  --sidebar: #101218;
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --card-grad: linear-gradient(155deg, #1e1b4b 0%, #312e81 50%, #1e293b 100%);
   color-scheme: dark;
 }
 
@@ -51,175 +51,196 @@ body {
     -apple-system,
     BlinkMacSystemFont,
     "SF Pro Text",
-    "SF Pro Display",
     "Segoe UI",
     Helvetica,
     Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 input[type='text']::-webkit-outer-spin-button,
-input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   appearance: none;
   margin: 0;
 }
 
-/* Rich field so clear glass has something to refract (HIG) */
-.scene {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.85;
-}
-
-.orb-a {
-  width: 52vw;
-  height: 52vw;
-  top: -18%;
-  left: -10%;
-  background: #9ec5ff;
-}
-
-.orb-b {
-  width: 44vw;
-  height: 44vw;
-  top: 8%;
-  right: -12%;
-  background: #ffd2a8;
-}
-
-.orb-c {
-  width: 38vw;
-  height: 38vw;
-  bottom: -12%;
-  left: 28%;
-  background: #d5c7ff;
-}
-
-.dark .orb-a {
-  background: #1a3a7a;
-  opacity: 0.7;
-}
-.dark .orb-b {
-  background: #5a3218;
-  opacity: 0.55;
-}
-.dark .orb-c {
-  background: #3b2a6b;
-  opacity: 0.6;
-}
-
-.app-shell {
-  position: relative;
-  z-index: 1;
+.origin-shell {
   min-height: 100dvh;
-  padding-top: var(--safe-t);
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-.app-main {
-  position: relative;
-  z-index: 1;
-  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 12px);
+.origin-sidebar {
+  display: none;
 }
 
-@media (min-width: 640px) {
-  .app-main {
-    padding-bottom: calc(24px + var(--safe-b));
-  }
+.origin-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
-/* Clear Liquid Glass — functional layer over rich scene */
-.glass {
-  background: color-mix(in srgb, #ffffff 14%, transparent);
-  backdrop-filter: blur(16px) saturate(220%) brightness(1.12);
-  -webkit-backdrop-filter: blur(16px) saturate(220%) brightness(1.12);
-  border: 0.5px solid color-mix(in srgb, #ffffff 62%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-    0 10px 40px rgba(0, 0, 0, 0.08);
+.origin-logo {
+  display: block;
+  padding: 8px 12px 20px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
-.dark .glass {
-  background: color-mix(in srgb, #ffffff 8%, transparent);
-  border-color: color-mix(in srgb, #ffffff 22%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 10px 40px rgba(0, 0, 0, 0.4);
+.origin-side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
 }
 
-.panel {
-  background: color-mix(in srgb, var(--elevated) 86%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 0.5px solid color-mix(in srgb, #ffffff 40%, transparent);
+.origin-side-link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--secondary);
 }
 
-.dark .panel {
-  border-color: color-mix(in srgb, #ffffff 10%, transparent);
+.origin-side-link.is-active {
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 600;
 }
 
-@media (horizontal-viewport-segments: 2) {
-  :root {
-    --fold-gap: calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0));
-  }
+.dark .origin-side-link.is-active {
+  background: #1e1b4b;
+  color: #c7d2fe;
+}
 
-  .duo-split {
-    display: grid;
-    grid-template-columns: env(viewport-segment-width 0 0) minmax(0, 1fr);
-    column-gap: max(16px, var(--fold-gap));
-  }
+.origin-side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+}
+
+.origin-side-foot select,
+.origin-top-select {
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--separator);
+  background: var(--elevated);
+  color: var(--label);
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.origin-topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 12px;
+  background: var(--bg);
+}
+
+.origin-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.origin-topbar h1 {
+  margin: 2px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.origin-sub {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--secondary);
+}
+
+.origin-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.origin-mobile-nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+}
+
+.origin-mobile-nav a {
+  flex: none;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--secondary);
+  background: var(--elevated);
+  border: 1px solid var(--separator);
+}
+
+.origin-mobile-nav a.is-active {
+  color: #3730a3;
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  font-weight: 600;
+}
+
+.origin-content {
+  flex: 1;
+  min-width: 0;
 }
 
 @media (min-width: 840px) {
-  .duo-split {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
-  }
-}
-
-@media (min-width: 840px) and (orientation: landscape) {
-  .app-shell {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+  .origin-shell {
+    grid-template-columns: 232px minmax(0, 1fr);
   }
 
-  .app-rail {
+  .origin-sidebar {
     display: flex;
-    grid-row: 1 / -1;
+    flex-direction: column;
+    background: var(--sidebar);
+    border-right: 1px solid var(--separator);
+    padding: 20px 16px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
   }
 
-  .app-nav-top {
-    grid-column: 2;
-  }
-
-  .app-nav-links {
+  .origin-mobile-nav {
     display: none;
   }
 
-  .app-main {
-    grid-column: 2;
+  .origin-top-actions {
+    display: none;
+  }
+
+  .origin-topbar {
+    padding: 28px 32px 16px;
+  }
+
+  .origin-content main {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
   }
 }
 
-@media (max-width: 839px), (orientation: portrait) {
-  .app-rail {
-    display: none;
-  }
+.panel {
+  background: var(--elevated);
+  border: 1px solid var(--separator);
+  box-shadow: var(--card-shadow);
 }
 
 .card-stage {
@@ -228,16 +249,9 @@ input[type='number']::-webkit-inner-spin-button {
 
 .wealth-card {
   transform-style: preserve-3d;
-  transform: rotateX(0deg) rotateY(0deg);
-  transition: transform 0.18s ease-out;
   background: var(--card-grad);
   box-shadow: var(--card-shadow);
-  will-change: transform;
-  animation: card-idle 6s ease-in-out infinite;
-}
-
-.wealth-card.is-tilting {
-  animation: none;
+  transition: transform 0.18s ease-out;
 }
 
 .wealth-card-shine {
@@ -249,28 +263,10 @@ input[type='number']::-webkit-inner-spin-button {
   mix-blend-mode: overlay;
 }
 
-.dark .wealth-card-shine {
-  background: radial-gradient(
-    420px circle at var(--shine-x, 30%) var(--shine-y, 20%),
-    rgba(255, 255, 255, 0.18),
-    transparent 55%
-  );
-}
-
-@keyframes card-idle {
-  0%,
-  100% {
-    transform: rotateX(2deg) rotateY(-4deg) translateY(0);
-  }
-  50% {
-    transform: rotateX(-2deg) rotateY(4deg) translateY(-4px);
-  }
-}
-
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.985);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -279,17 +275,16 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .rise {
-  animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 .rise-1 {
   animation-delay: 0.05s;
 }
 .rise-2 {
-  animation-delay: 0.12s;
+  animation-delay: 0.1s;
 }
 .rise-3 {
-  animation-delay: 0.2s;
+  animation-delay: 0.16s;
 }
 
 .hit {
@@ -304,7 +299,7 @@ input[type='number']::-webkit-inner-spin-button {
 .compare-row {
   display: grid;
   grid-template-columns: 168px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-  border-bottom: 0.5px solid var(--separator);
+  border-bottom: 1px solid var(--separator);
 }
 
 .compare-row:last-child {
@@ -334,20 +329,12 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wealth-card,
   .rise,
   .rise-1,
   .rise-2,
-  .rise-3 {
+  .rise-3,
+  .wealth-card {
     animation: none !important;
     transition: none !important;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 }

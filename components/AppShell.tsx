@@ -14,62 +14,90 @@ const LINKS = [
   { href: '/markets', label: 'Markets' },
 ];
 
+function titles(path: string) {
+  const hit = LINKS.find((l) => l.href === path);
+  return {
+    title: hit?.label ?? 'Overview',
+    sub:
+      path === '/holdings'
+        ? 'Accounts, tickers, and mark-to-market'
+        : path === '/spend'
+          ? 'Income, bills, and savings rate'
+          : path === '/compare'
+            ? 'Housing vs rent vs investing'
+            : path === '/markets'
+              ? 'Live public prices'
+              : 'Net worth, plan, and cashflow',
+  };
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data, patch } = useWealth();
+  const { title, sub } = titles(pathname);
 
   return (
-    <div className="app-shell">
-      <div className="scene" aria-hidden>
-        <div className="orb orb-a" />
-        <div className="orb orb-b" />
-        <div className="orb orb-c" />
-      </div>
-
-      <header className="pointer-events-none sticky top-0 z-20 flex justify-center px-3 pt-3 sm:px-5">
-        <div className="nav-capsule pointer-events-auto glass flex h-14 w-full max-w-[980px] items-center gap-3 rounded-full pl-2 pr-2">
-          <Link
-            href="/"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black text-[13px] font-semibold text-white dark:bg-white dark:text-black"
+    <div className="origin-shell">
+      <aside className="origin-sidebar">
+        <Link href="/" className="origin-logo">
+          Wealth
+        </Link>
+        <nav className="origin-side-nav" aria-label="Primary">
+          {LINKS.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link key={link.href} href={link.href} className={`origin-side-link${active ? ' is-active' : ''}`}>
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="origin-side-foot">
+          <select
+            aria-label="Tax region"
+            value={data.taxRegion}
+            onChange={(e) => patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))}
           >
-            W
-          </Link>
-          <div className="hidden h-6 w-px bg-white/30 sm:block" />
-          <nav className="hidden min-w-0 flex-1 items-center gap-0 overflow-x-auto sm:flex">
-            {LINKS.map((link) => {
-              const active = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`hit inline-flex shrink-0 items-center px-3 text-[14px] ${
-                    active ? 'font-semibold text-[var(--label)]' : 'text-[var(--label)]/70'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="ml-auto flex items-center gap-1">
+            <option value="NZ">New Zealand</option>
+            <option value="AU">Australia</option>
+          </select>
+          <select
+            aria-label="Currency"
+            value={data.currency}
+            onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code}
+              </option>
+            ))}
+          </select>
+          <ThemeToggle />
+        </div>
+      </aside>
+
+      <div className="origin-body">
+        <header className="origin-topbar">
+          <div>
+            <p className="origin-kicker">Planning</p>
+            <h1>{title}</h1>
+            <p className="origin-sub">{sub}</p>
+          </div>
+          <div className="origin-top-actions">
             <select
               aria-label="Tax region"
+              className="origin-top-select"
               value={data.taxRegion}
-              onChange={(e) =>
-                patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))
-              }
-              className="h-9 rounded-full bg-transparent px-2 text-[13px] outline-none"
+              onChange={(e) => patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))}
             >
               <option value="NZ">NZ</option>
               <option value="AU">AU</option>
             </select>
             <select
               aria-label="Currency"
+              className="origin-top-select"
               value={data.currency}
-              onChange={(e) =>
-                patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))
-              }
-              className="h-9 rounded-full bg-transparent px-2 text-[13px] outline-none"
+              onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
             >
               {CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -79,30 +107,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </select>
             <ThemeToggle />
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="app-main">{children}</div>
+        <nav className="origin-mobile-nav" aria-label="Pages">
+          {LINKS.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link key={link.href} href={link.href} className={active ? 'is-active' : ''}>
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <nav
-        className="nav-capsule glass pointer-events-auto fixed inset-x-3 z-30 flex items-center justify-around rounded-full px-1 py-1 sm:hidden"
-        style={{ bottom: 'max(10px, var(--safe-b))' }}
-      >
-        {LINKS.map((link) => {
-          const active = pathname === link.href;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`hit flex flex-1 items-center justify-center rounded-full text-[11px] ${
-                active ? 'font-semibold' : 'text-[var(--secondary)]'
-              }`}
-            >
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
+        <div className="origin-content">{children}</div>
+      </div>
     </div>
   );
 }
