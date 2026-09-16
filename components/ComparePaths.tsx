@@ -4,18 +4,21 @@ import { RateInput, YearsInput } from '@/components/CurrencyInput';
 import { Hairline, Row } from '@/components/HoldingsGroup';
 import { runCompare } from '@/lib/compare';
 import { formatCents, toCents } from '@/lib/money';
+import type { CurrencyCode } from '@/lib/currency';
 import type { CompareInputs } from '@/lib/types';
 
 export function ComparePaths({
   value,
   onChange,
   hydrated,
+  currency,
 }: {
   value: CompareInputs;
   onChange: (next: CompareInputs) => void;
   hydrated: boolean;
+  currency: CurrencyCode;
 }) {
-  const { columns, rows } = runCompare(value);
+  const { columns, rows } = runCompare(value, currency);
   const best = Math.max(...columns.map((p) => p.endingCents));
 
   const patch = (partial: Partial<CompareInputs>) => onChange({ ...value, ...partial });
@@ -131,7 +134,7 @@ export function ComparePaths({
                     {p.title}
                   </div>
                   <div className="mt-1 min-h-[34px] text-[28px] font-semibold tracking-tight tabular-nums">
-                    {hydrated ? formatCents(p.endingCents) : '—'}
+                    {hydrated ? formatCents(p.endingCents, currency) : '—'}
                   </div>
                   <div className="mt-1 text-[13px] text-[var(--secondary)]">{p.subtitle}</div>
                   {hydrated && p.endingCents === best && best > 0 && (

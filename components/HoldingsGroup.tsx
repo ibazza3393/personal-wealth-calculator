@@ -1,7 +1,7 @@
 'use client';
 
 import { CurrencyInput } from '@/components/CurrencyInput';
-import { toCents } from '@/lib/money';
+import { parseUnits, toCents } from '@/lib/money';
 import { MAX_ITEMS } from '@/lib/sanitize';
 import type { Holding } from '@/lib/types';
 
@@ -72,14 +72,96 @@ export function EditableRow({
   );
 }
 
+export function PricedRow({
+  name,
+  symbol,
+  units,
+  liveLabel,
+  fallbackCents,
+  onName,
+  onSymbol,
+  onUnits,
+  onCents,
+  onRemove,
+  disabled,
+}: {
+  name: string;
+  symbol: string;
+  units: number;
+  liveLabel: string;
+  fallbackCents: number;
+  onName: (name: string) => void;
+  onSymbol: (symbol: string) => void;
+  onUnits: (units: number) => void;
+  onCents: (cents: number) => void;
+  onRemove: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+      <input
+        type="text"
+        value={name}
+        disabled={disabled}
+        onChange={(e) => onName(e.target.value.slice(0, 80))}
+        aria-label="Name"
+        placeholder="Name"
+        className="min-w-[8rem] flex-1 bg-transparent text-[17px] outline-none placeholder:text-[var(--tertiary)]"
+      />
+      <input
+        type="text"
+        value={symbol}
+        disabled={disabled}
+        onChange={(e) => onSymbol(e.target.value.toUpperCase().slice(0, 8))}
+        aria-label="Symbol"
+        placeholder="BTC"
+        className="w-16 bg-transparent text-[13px] font-medium tracking-wide text-[var(--secondary)] outline-none placeholder:text-[var(--tertiary)]"
+      />
+      <input
+        type="text"
+        inputMode="decimal"
+        value={units ? String(units) : ''}
+        disabled={disabled}
+        onChange={(e) => onUnits(parseUnits(e.target.value))}
+        aria-label="Units"
+        placeholder="Units"
+        className="w-20 bg-transparent text-right text-[15px] tabular-nums outline-none placeholder:text-[var(--tertiary)]"
+      />
+      <div className="ml-auto text-right">
+        <p className="text-[15px] font-medium tabular-nums">{liveLabel}</p>
+        {!units && (
+          <CurrencyInput
+            cents={fallbackCents}
+            onCentsChange={onCents}
+            ariaLabel={`${name} amount`}
+            disabled={disabled}
+          />
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${name}`}
+        className="h-8 w-8 text-[22px] leading-none text-[var(--tertiary)] hover:text-[var(--red)]"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 export function HoldingsGroup({
   title,
   empty,
   add,
   items,
   disabled,
+  priced,
+  liveLabel,
   onAdd,
   onName,
+  onSymbol,
+  onUnits,
   onCents,
   onRemove,
 }: {
@@ -88,8 +170,12 @@ export function HoldingsGroup({
   add: string;
   items: Holding[];
   disabled: boolean;
+  priced?: boolean;
+  liveLabel: (item: Holding) => string;
   onAdd: () => void;
   onName: (id: string, name: string) => void;
+  onSymbol: (id: string, symbol: string) => void;
+  onUnits: (id: string, units: number) => void;
   onCents: (id: string, cents: number) => void;
   onRemove: (id: string) => void;
 }) {
@@ -103,14 +189,30 @@ export function HoldingsGroup({
         {items.map((item, i) => (
           <div key={item.id}>
             {i > 0 && <Hairline />}
-            <EditableRow
-              name={item.name}
-              cents={toCents(item.value)}
-              disabled={disabled}
-              onName={(name) => onName(item.id, name)}
-              onCents={(cents) => onCents(item.id, cents)}
-              onRemove={() => onRemove(item.id)}
-            />
+            {priced ? (
+              <PricedRow
+                name={item.name}
+                symbol={item.symbol ?? ''}
+                units={item.units ?? 0}
+                liveLabel={liveLabel(item)}
+                fallbackCents={toCents(item.value)}
+                disabled={disabled}
+                onName={(name) => onName(item.id, name)}
+                onSymbol={(symbol) => onSymbol(item.id, symbol)}
+                onUnits={(units) => onUnits(item.id, units)}
+                onCents={(cents) => onCents(item.id, cents)}
+                onRemove={() => onRemove(item.id)}
+              />
+            ) : (
+              <EditableRow
+                name={item.name}
+                cents={toCents(item.value)}
+                disabled={disabled}
+                onName={(name) => onName(item.id, name)}
+                onCents={(cents) => onCents(item.id, cents)}
+                onRemove={() => onRemove(item.id)}
+              />
+            )}
           </div>
         ))}
         {items.length < MAX_ITEMS && (

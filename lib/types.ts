@@ -1,3 +1,5 @@
+import type { CurrencyCode } from './currency';
+
 export type HoldingKind =
   | 'stocks'
   | 'bitcoin'
@@ -12,6 +14,8 @@ export interface Holding {
   kind: HoldingKind;
   name: string;
   value: number;
+  symbol?: string;
+  units?: number;
 }
 
 export interface LiabilityItem {
@@ -34,6 +38,7 @@ export interface CompareInputs {
 }
 
 export interface WealthData {
+  currency: CurrencyCode;
   liquidCash: number;
   propertyValue: number;
   holdings: Holding[];
@@ -55,6 +60,7 @@ export const DEFAULT_COMPARE: CompareInputs = {
 };
 
 export const DEFAULT_WEALTH_DATA: WealthData = {
+  currency: 'USD',
   liquidCash: 0,
   propertyValue: 0,
   holdings: [],
@@ -72,35 +78,39 @@ export const HOLDING_GROUPS: {
   add: string;
   empty: string;
   color: string;
+  priced?: boolean;
 }[] = [
   {
     kind: 'stocks',
     title: 'Stocks',
-    caption: 'Individual shares and brokerages',
+    caption: 'Ticker + shares marks to market',
     add: 'Add stock',
     empty: 'No stocks yet',
     color: '#5e5ce6',
+    priced: true,
   },
   {
     kind: 'bitcoin',
     title: 'Bitcoin',
-    caption: 'BTC on-chain or at an exchange — enter the USD value',
+    caption: 'BTC amount × live price',
     add: 'Add bitcoin',
     empty: 'No bitcoin yet',
     color: '#f7931a',
+    priced: true,
   },
   {
     kind: 'crypto',
     title: 'Other crypto',
-    caption: 'ETH and everything else, in USD',
+    caption: 'ETH, SOL — units × live price',
     add: 'Add crypto',
     empty: 'No other crypto yet',
     color: '#bf5af2',
+    priced: true,
   },
   {
     kind: 'bonds',
     title: 'Bonds',
-    caption: 'Treasuries, corporates, bond funds',
+    caption: 'Treasuries, corporates — enter value',
     add: 'Add bond',
     empty: 'No bonds yet',
     color: '#8e8e93',
@@ -108,15 +118,16 @@ export const HOLDING_GROUPS: {
   {
     kind: 'funds',
     title: 'Mutual funds & ETFs',
-    caption: 'Index funds, target-date, active funds',
+    caption: 'SPY, QQQ, VTI — ticker + units',
     add: 'Add fund',
     empty: 'No funds yet',
     color: '#64d2ff',
+    priced: true,
   },
   {
     kind: 'retirement',
     title: 'Retirement',
-    caption: 'KiwiSaver, 401(k), IRA, super',
+    caption: 'KiwiSaver, 401(k), IRA — enter value',
     add: 'Add account',
     empty: 'No retirement accounts yet',
     color: '#30d158',
@@ -124,7 +135,7 @@ export const HOLDING_GROUPS: {
   {
     kind: 'business',
     title: 'Business',
-    caption: 'Private companies and side equity',
+    caption: 'Private equity you estimate',
     add: 'Add business',
     empty: 'No business equity yet',
     color: '#ff9f0a',

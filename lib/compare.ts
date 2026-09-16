@@ -1,4 +1,5 @@
-import { toCents } from './money';
+import { formatCents, toCents } from './money';
+import type { CurrencyCode } from './currency';
 import type { CompareInputs } from './types';
 
 const MORTGAGE_YEARS = 30;
@@ -67,15 +68,11 @@ export function futureValueMonthly(
   return lump * growth + monthly * ((growth - 1) / rm);
 }
 
-function fmt(n: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(Math.round(n));
+function money(n: number, currency: CurrencyCode) {
+  return formatCents(toCents(Math.max(0, n)), currency);
 }
 
-export function runCompare(input: CompareInputs): CompareResult {
+export function runCompare(input: CompareInputs, currency: CurrencyCode = 'USD'): CompareResult {
   const years = Math.round(clamp(input.years, 1, 40));
   const lump = Math.max(0, input.lumpSum);
   const monthlyBudget = Math.max(0, input.monthlyBudget);
@@ -122,7 +119,7 @@ export function runCompare(input: CompareInputs): CompareResult {
   const spNet = futureValueMonthly(lump, monthlyBudget, sp, years);
   const spDeployed = lump + monthlyBudget * months;
 
-  const money = (n: number) => fmt(n);
+  const moneyFmt = (n: number) => money(n, currency);
   const dash = '—';
 
   return {
@@ -147,20 +144,20 @@ export function runCompare(input: CompareInputs): CompareResult {
       },
     ],
     rows: [
-      { label: 'Starting capital', cells: [money(lump), money(lump), money(lump)] },
+      { label: 'Starting capital', cells: [moneyFmt(lump), moneyFmt(lump), moneyFmt(lump)] },
       {
         label: 'Monthly outlay (year 1)',
-        cells: [money(housingMonthlyStart), money(rent0), money(monthlyBudget)],
+        cells: [moneyFmt(housingMonthlyStart), moneyFmt(rent0), moneyFmt(monthlyBudget)],
       },
-      { label: 'Home value', cells: [money(homeEnd), dash, dash] },
-      { label: 'Remaining mortgage', cells: [money(balance), dash, dash] },
-      { label: 'Home equity', cells: [money(equity), money(0), money(0)] },
+      { label: 'Home value', cells: [moneyFmt(homeEnd), dash, dash] },
+      { label: 'Remaining mortgage', cells: [moneyFmt(balance), dash, dash] },
+      { label: 'Home equity', cells: [moneyFmt(equity), moneyFmt(0), moneyFmt(0)] },
       {
         label: 'Investment portfolio',
-        cells: [money(leftoverFv), money(rentPortfolio), money(spNet)],
+        cells: [moneyFmt(leftoverFv), moneyFmt(rentPortfolio), moneyFmt(spNet)],
       },
-      { label: 'Cash spent', cells: [money(housingPaid), money(rentPaid), money(spDeployed)] },
-      { label: 'Ending net', cells: [money(housingNet), money(rentPortfolio), money(spNet)] },
+      { label: 'Cash spent', cells: [moneyFmt(housingPaid), moneyFmt(rentPaid), moneyFmt(spDeployed)] },
+      { label: 'Ending net', cells: [moneyFmt(housingNet), moneyFmt(rentPortfolio), moneyFmt(spNet)] },
     ],
   };
 }
