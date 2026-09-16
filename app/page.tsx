@@ -69,7 +69,7 @@ export default function OverviewPage() {
 
   return (
     <main className="pt-4">
-      <section className="rise flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rise flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <div>
           <p className="text-[13px] text-[var(--secondary)]">Net worth</p>
           <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[48px]">
