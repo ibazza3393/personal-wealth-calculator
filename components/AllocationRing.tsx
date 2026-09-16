@@ -16,49 +16,69 @@ type Props = {
 };
 
 export function AllocationRing({ segments, totalCents, format, hydrated }: Props) {
-  const r = 36;
+  const size = 196;
+  const cx = size / 2;
+  const stroke = 22;
+  const r = (size - stroke) / 2 - 4;
   const c = 2 * Math.PI * r;
-  let offset = 0;
+  const gap = 10;
   const visible = segments.filter((s) => s.cents > 0);
   const list = visible.length ? visible : segments;
 
+  let offset = 0;
+
   return (
-    <div className="flex items-center gap-6">
-      <svg viewBox="0 0 88 88" className="h-[88px] w-[88px] shrink-0 -rotate-90" aria-hidden>
-        <circle cx="44" cy="44" r={r} fill="none" stroke="var(--ring-track)" strokeWidth="8" />
-        {totalCents > 0 &&
-          list.map((seg) => {
-            const len = (seg.width / 100) * c;
-            const dashOffset = -offset;
-            offset += len;
-            if (len <= 0) return null;
-            return (
-              <circle
-                key={seg.label}
-                cx="44"
-                cy="44"
-                r={r}
-                fill="none"
-                stroke={seg.color}
-                strokeWidth="8"
-                strokeDasharray={`${len} ${c - len}`}
-                strokeDashoffset={dashOffset}
-              />
-            );
-          })}
-      </svg>
-      <ul className="min-w-0 flex-1 space-y-2.5">
+    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
+      <div className="relative h-[196px] w-[196px] shrink-0">
+        <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90" aria-hidden>
+          <circle
+            cx={cx}
+            cy={cx}
+            r={r}
+            fill="none"
+            stroke="var(--ring-track)"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+          />
+          {totalCents > 0 &&
+            list.map((seg) => {
+              const raw = (seg.width / 100) * c;
+              const len = Math.max(0, raw - gap);
+              const dashOffset = -offset;
+              offset += raw;
+              if (len <= 0) return null;
+              return (
+                <circle
+                  key={seg.label}
+                  cx={cx}
+                  cy={cx}
+                  r={r}
+                  fill="none"
+                  stroke={seg.color}
+                  strokeWidth={stroke}
+                  strokeLinecap="round"
+                  strokeDasharray={`${len} ${c - len}`}
+                  strokeDashoffset={dashOffset}
+                />
+              );
+            })}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-[var(--tertiary)]">TOTAL</p>
+          <p className="mt-1 text-[22px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
+            {hydrated ? format(totalCents) : '—'}
+          </p>
+        </div>
+      </div>
+      <ul className="min-w-0 w-full flex-1 space-y-3">
         {list.map((seg) => (
-          <li key={seg.label} className="flex items-baseline justify-between gap-3 text-[13px]">
-            <span className="flex min-w-0 items-center gap-2 text-[var(--label)]">
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: seg.color }} />
+          <li key={seg.label} className="flex items-baseline justify-between gap-3 text-[15px]">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: seg.color }} />
               <span className="truncate">{seg.label}</span>
-              <span className="tabular-nums text-[var(--secondary)]">
-                {hydrated ? `${seg.percent}%` : '—'}
-              </span>
             </span>
             <span className="shrink-0 tabular-nums text-[var(--secondary)]">
-              {hydrated ? format(seg.cents) : '—'}
+              {hydrated ? `${seg.percent}%  ${format(seg.cents)}` : '—'}
             </span>
           </li>
         ))}

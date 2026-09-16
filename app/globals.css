@@ -239,20 +239,77 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .year-chip {
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 8px;
+  height: 32px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 980px;
   border: 1px solid var(--separator);
   background: transparent;
   color: var(--secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .year-chip.is-on {
-  background: var(--blue);
-  border-color: var(--blue);
+  background: var(--label);
+  border-color: var(--label);
   color: #fff;
+}
+
+.dark .year-chip.is-on {
+  color: #000;
+}
+
+.hero-stack {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .hero-stack {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+    gap: 20px;
+  }
+}
+
+.hero-figures {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-caption {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--secondary);
+}
+
+.hero-current {
+  margin-top: 4px;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.hero-projected {
+  margin-top: 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #ffd60a 0%, #ff9f0a 42%, #ff375f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.year-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .origin-side-foot {

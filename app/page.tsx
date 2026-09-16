@@ -77,20 +77,16 @@ export default function OverviewPage() {
 
   return (
     <main className="pt-4">
-      <section className="rise flex flex-col items-start gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex min-w-0 flex-wrap items-end gap-8">
+      <section className="hero-stack">
+        <div className="hero-figures">
           <div>
-            <p className="text-[13px] text-[var(--secondary)]">Current net worth</p>
-            <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[44px]">
-              {figure(netCents)}
-            </p>
+            <p className="hero-caption">Current net worth</p>
+            <p className="hero-current tabular-nums">{figure(netCents)}</p>
           </div>
           <div>
-            <p className="text-[13px] text-[var(--secondary)]">Projected · {data.compare.years}y</p>
-            <p className="mt-1 text-[28px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-[var(--blue)]">
-              {figure(projectedCents)}
-            </p>
-            <div className="mt-2 flex gap-1">
+            <p className="hero-caption">Projected · {data.compare.years} years</p>
+            <p className="hero-projected tabular-nums">{figure(projectedCents)}</p>
+            <div className="year-row" role="group" aria-label="Projection horizon">
               {[5, 10, 20, 30].map((y) => (
                 <button
                   key={y}
@@ -110,19 +106,19 @@ export default function OverviewPage() {
           years={data.compare.years}
           currency={currency}
         />
-        {writeError && (
-          <p className="mt-3 w-full text-[13px] text-[var(--red)]" role="alert">
-            {writeError}
-          </p>
-        )}
       </section>
+      {writeError && (
+        <p className="mt-4 text-[13px] text-[var(--red)]" role="alert">
+          {writeError}
+        </p>
+      )}
 
-      <div className="mt-5">
+      <div className="mt-6">
         <ConsentBanner />
         <LedgerStrip />
       </div>
 
-      <div className="rise rise-1 mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="rise rise-1 mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi label="Assets" value={figure(assetCents)} />
         <Kpi label="Liabilities" value={figure(liabilityCents)} />
         <Kpi label="Monthly income" value={figure(cashflow.income)} />
