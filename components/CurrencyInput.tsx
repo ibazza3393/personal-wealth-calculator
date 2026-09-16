@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { inputValueFromCents, parseDollars, toCents } from '@/lib/money';
+import { formatCents, inputValueFromCents, parseDollars, toCents } from '@/lib/money';
+import type { CurrencyCode } from '@/lib/currency';
 
 const fieldClass =
   'h-11 w-[7.5rem] bg-transparent text-right text-[17px] font-normal tabular-nums tracking-tight text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40';
@@ -11,11 +12,13 @@ export function CurrencyInput({
   onCentsChange,
   ariaLabel,
   disabled,
+  currency = 'USD',
 }: {
   cents: number;
   onCentsChange: (cents: number) => void;
   ariaLabel: string;
   disabled?: boolean;
+  currency?: CurrencyCode;
 }) {
   const [focused, setFocused] = useState(false);
   const [draft, setDraft] = useState('');
@@ -28,7 +31,7 @@ export function CurrencyInput({
       spellCheck={false}
       aria-label={ariaLabel}
       disabled={disabled}
-      value={focused ? draft : inputValueFromCents(cents)}
+      value={focused ? draft : formatCents(cents, currency, cents % 100 === 0 ? 0 : 2)}
       onFocus={() => {
         setDraft(inputValueFromCents(cents));
         setFocused(true);

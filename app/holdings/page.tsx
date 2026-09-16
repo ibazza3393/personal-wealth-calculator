@@ -39,17 +39,13 @@ export default function HoldingsPage() {
 
   return (
     <main className="pt-4">
-      <h1 className="text-[28px] font-semibold tracking-tight">Holdings</h1>
-      <p className="mt-1 max-w-xl text-[15px] text-[var(--secondary)]">
-        Tickers and units mark to market. Your list never leaves this browser — only public prices are fetched.
-      </p>
-
-      <p className="mb-2 mt-8 px-4 text-[13px] font-semibold text-[var(--secondary)]">Core</p>
-      <div className="overflow-hidden rounded-[20px] bg-[var(--elevated)]">
+      <p className="mb-2 text-[13px] font-semibold text-[var(--secondary)]">Core</p>
+      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
         <Row
           label="Liquid cash"
           caption="Checking, savings"
           cents={toCents(liquidCash)}
+          currency={currency}
           onCents={(cents) => patch((p) => ({ ...p, liquidCash: centsToDollars(cents) }))}
           disabled={!isHydrated}
         />
@@ -58,6 +54,7 @@ export default function HoldingsPage() {
           label="Property"
           caption="Estimated market value"
           cents={toCents(propertyValue)}
+          currency={currency}
           onCents={(cents) => patch((p) => ({ ...p, propertyValue: centsToDollars(cents) }))}
           disabled={!isHydrated}
         />
@@ -70,10 +67,12 @@ export default function HoldingsPage() {
           empty={group.empty}
           add={group.add}
           priced={group.priced}
+          tickerPlaceholder={group.kind === 'bitcoin' ? 'BTC' : group.kind === 'crypto' ? 'ETH' : 'AAPL'}
+          currency={currency}
           items={holdings.filter((h) => h.kind === group.kind)}
           disabled={!isHydrated}
           liveLabel={(item) => formatCents(holdingValue(item), currency)}
-          onAdd={() => addHolding(group.kind, group.title, group.kind === 'bitcoin' ? 'BTC' : undefined)}
+          onAdd={() => addHolding(group.kind, '', group.kind === 'bitcoin' ? 'BTC' : undefined)}
           onName={(id, name) =>
             patch((p) => ({
               ...p,
@@ -109,8 +108,8 @@ export default function HoldingsPage() {
         />
       ))}
 
-      <p className="mb-2 mt-6 px-4 text-[13px] font-semibold text-[var(--secondary)]">Liabilities</p>
-      <div className="overflow-hidden rounded-[20px] bg-[var(--elevated)]">
+      <p className="mb-2 mt-6 text-[13px] font-semibold text-[var(--secondary)]">Liabilities</p>
+      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
         {liabilities.length === 0 && (
           <p className="px-4 py-3.5 text-[15px] text-[var(--tertiary)]">No loans or cards yet</p>
         )}
@@ -120,6 +119,7 @@ export default function HoldingsPage() {
             <EditableRow
               name={item.name}
               cents={toCents(item.value)}
+              currency={currency}
               disabled={!isHydrated}
               onName={(name) =>
                 patch((p) => ({

@@ -3,10 +3,11 @@
 import { CurrencyInput } from '@/components/CurrencyInput';
 import { parseUnits, toCents } from '@/lib/money';
 import { MAX_ITEMS } from '@/lib/sanitize';
+import type { CurrencyCode } from '@/lib/currency';
 import type { Holding } from '@/lib/types';
 
 export function Hairline() {
-  return <div className="ml-4 h-px bg-[var(--separator)]" />;
+  return <div className="h-px bg-[var(--separator)]" />;
 }
 
 export function Row({
@@ -15,20 +16,28 @@ export function Row({
   cents,
   onCents,
   disabled,
+  currency = 'USD',
 }: {
   label: string;
   caption: string;
   cents: number;
   onCents: (cents: number) => void;
   disabled: boolean;
+  currency?: CurrencyCode;
 }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="flex min-h-[52px] items-center gap-3 px-4 py-2">
       <div className="min-w-0 flex-1">
         <p className="text-[17px] leading-tight">{label}</p>
         <p className="text-[13px] text-[var(--secondary)]">{caption}</p>
       </div>
-      <CurrencyInput cents={cents} onCentsChange={onCents} ariaLabel={label} disabled={disabled} />
+      <CurrencyInput
+        cents={cents}
+        currency={currency}
+        onCentsChange={onCents}
+        ariaLabel={label}
+        disabled={disabled}
+      />
     </div>
   );
 }
@@ -40,6 +49,7 @@ export function EditableRow({
   onCents,
   onRemove,
   disabled,
+  currency = 'USD',
 }: {
   name: string;
   cents: number;
@@ -47,9 +57,10 @@ export function EditableRow({
   onCents: (cents: number) => void;
   onRemove: () => void;
   disabled: boolean;
+  currency?: CurrencyCode;
 }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5">
+    <div className="flex min-h-[52px] items-center gap-2 px-4">
       <input
         type="text"
         value={name}
@@ -59,12 +70,18 @@ export function EditableRow({
         className="min-w-0 flex-1 bg-transparent text-[17px] text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40"
         placeholder="Name"
       />
-      <CurrencyInput cents={cents} onCentsChange={onCents} ariaLabel={`${name} amount`} disabled={disabled} />
+      <CurrencyInput
+        cents={cents}
+        currency={currency}
+        onCentsChange={onCents}
+        ariaLabel={`${name} amount`}
+        disabled={disabled}
+      />
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${name}`}
-        className="h-8 w-8 shrink-0 text-[22px] leading-none text-[var(--tertiary)] hover:text-[var(--red)]"
+        className="hit shrink-0 text-[22px] leading-none text-[var(--tertiary)] hover:text-[var(--red)]"
       >
         ×
       </button>
@@ -78,60 +95,72 @@ export function PricedRow({
   units,
   liveLabel,
   fallbackCents,
+  tickerPlaceholder,
   onName,
   onSymbol,
   onUnits,
   onCents,
   onRemove,
   disabled,
+  currency,
 }: {
   name: string;
   symbol: string;
   units: number;
   liveLabel: string;
   fallbackCents: number;
+  tickerPlaceholder: string;
   onName: (name: string) => void;
   onSymbol: (symbol: string) => void;
   onUnits: (units: number) => void;
   onCents: (cents: number) => void;
   onRemove: () => void;
   disabled: boolean;
+  currency: CurrencyCode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
-      <input
-        type="text"
-        value={name}
-        disabled={disabled}
-        onChange={(e) => onName(e.target.value.slice(0, 80))}
-        aria-label="Name"
-        placeholder="Name"
-        className="min-w-[8rem] flex-1 bg-transparent text-[17px] outline-none placeholder:text-[var(--tertiary)]"
-      />
-      <input
-        type="text"
-        value={symbol}
-        disabled={disabled}
-        onChange={(e) => onSymbol(e.target.value.toUpperCase().slice(0, 8))}
-        aria-label="Symbol"
-        placeholder="BTC"
-        className="w-16 bg-transparent text-[13px] font-medium tracking-wide text-[var(--secondary)] outline-none placeholder:text-[var(--tertiary)]"
-      />
-      <input
-        type="text"
-        inputMode="decimal"
-        value={units ? String(units) : ''}
-        disabled={disabled}
-        onChange={(e) => onUnits(parseUnits(e.target.value))}
-        aria-label="Units"
-        placeholder="Units"
-        className="w-20 bg-transparent text-right text-[15px] tabular-nums outline-none placeholder:text-[var(--tertiary)]"
-      />
-      <div className="ml-auto text-right">
-        <p className="text-[15px] font-medium tabular-nums">{liveLabel}</p>
-        {!units && (
+    <div className="flex min-h-[56px] items-center gap-3 px-4 py-2">
+      <div className="min-w-0 flex-1">
+        <input
+          type="text"
+          value={name}
+          disabled={disabled}
+          onChange={(e) => onName(e.target.value.slice(0, 80))}
+          aria-label="Name"
+          placeholder="Name"
+          className="w-full bg-transparent text-[17px] outline-none placeholder:text-[var(--tertiary)]"
+        />
+        <div className="mt-0.5 flex items-center gap-2 text-[13px] text-[var(--secondary)]">
+          <input
+            type="text"
+            value={symbol}
+            disabled={disabled}
+            onChange={(e) => onSymbol(e.target.value.toUpperCase().slice(0, 8))}
+            aria-label="Symbol"
+            placeholder={tickerPlaceholder}
+            className="w-16 bg-transparent font-medium tracking-wide outline-none placeholder:text-[var(--tertiary)]"
+          />
+          <span aria-hidden>·</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={units ? String(units) : ''}
+            disabled={disabled}
+            onChange={(e) => onUnits(parseUnits(e.target.value))}
+            aria-label="Units"
+            placeholder="0"
+            className="w-16 bg-transparent tabular-nums outline-none placeholder:text-[var(--tertiary)]"
+          />
+          <span>sh</span>
+        </div>
+      </div>
+      <div className="text-right">
+        {units ? (
+          <p className="text-[17px] tabular-nums">{liveLabel}</p>
+        ) : (
           <CurrencyInput
             cents={fallbackCents}
+            currency={currency}
             onCentsChange={onCents}
             ariaLabel={`${name} amount`}
             disabled={disabled}
@@ -142,7 +171,7 @@ export function PricedRow({
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${name}`}
-        className="h-8 w-8 text-[22px] leading-none text-[var(--tertiary)] hover:text-[var(--red)]"
+        className="hit shrink-0 text-[22px] leading-none text-[var(--tertiary)] hover:text-[var(--red)]"
       >
         ×
       </button>
@@ -157,6 +186,8 @@ export function HoldingsGroup({
   items,
   disabled,
   priced,
+  tickerPlaceholder,
+  currency,
   liveLabel,
   onAdd,
   onName,
@@ -171,6 +202,8 @@ export function HoldingsGroup({
   items: Holding[];
   disabled: boolean;
   priced?: boolean;
+  tickerPlaceholder: string;
+  currency: CurrencyCode;
   liveLabel: (item: Holding) => string;
   onAdd: () => void;
   onName: (id: string, name: string) => void;
@@ -181,11 +214,9 @@ export function HoldingsGroup({
 }) {
   return (
     <>
-      <p className="mb-2 mt-6 px-4 text-[13px] font-semibold text-[var(--secondary)]">{title}</p>
-      <div className="overflow-hidden rounded-[20px] bg-[var(--elevated)]">
-        {items.length === 0 && (
-          <p className="px-4 py-3.5 text-[15px] text-[var(--tertiary)]">{empty}</p>
-        )}
+      <p className="mb-2 mt-6 text-[13px] font-semibold text-[var(--secondary)]">{title}</p>
+      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
+        {items.length === 0 && <p className="px-4 py-3.5 text-[15px] text-[var(--tertiary)]">{empty}</p>}
         {items.map((item, i) => (
           <div key={item.id}>
             {i > 0 && <Hairline />}
@@ -196,6 +227,8 @@ export function HoldingsGroup({
                 units={item.units ?? 0}
                 liveLabel={liveLabel(item)}
                 fallbackCents={toCents(item.value)}
+                tickerPlaceholder={tickerPlaceholder}
+                currency={currency}
                 disabled={disabled}
                 onName={(name) => onName(item.id, name)}
                 onSymbol={(symbol) => onSymbol(item.id, symbol)}
@@ -207,6 +240,7 @@ export function HoldingsGroup({
               <EditableRow
                 name={item.name}
                 cents={toCents(item.value)}
+                currency={currency}
                 disabled={disabled}
                 onName={(name) => onName(item.id, name)}
                 onCents={(cents) => onCents(item.id, cents)}
@@ -217,7 +251,7 @@ export function HoldingsGroup({
         ))}
         {items.length < MAX_ITEMS && (
           <>
-            <Hairline />
+            {items.length > 0 && <Hairline />}
             <button
               type="button"
               onClick={onAdd}
