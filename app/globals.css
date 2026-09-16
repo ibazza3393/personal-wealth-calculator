@@ -163,12 +163,42 @@ input[type='number']::-webkit-inner-spin-button {
   padding: 12px var(--margin) 0;
 }
 
+.origin-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
 .origin-logo {
-  display: block;
-  padding: 8px 12px 20px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.04em;
+}
+
+.sidebar-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--secondary);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.origin-side-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--secondary);
 }
 
 .origin-side-nav {
@@ -178,20 +208,51 @@ input[type='number']::-webkit-inner-spin-button {
   flex: 1;
 }
 
-.origin-side-link {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  border-radius: 12px;
-  font-size: 15px;
-  color: var(--secondary);
-}
-
 .origin-side-link.is-active {
   background: var(--glass-text);
   color: var(--label);
   font-weight: 600;
+}
+
+.origin-shell.is-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.origin-shell.is-collapsed .origin-sidebar {
+  min-width: 72px;
+  max-width: 72px;
+  padding: 12px 8px;
+}
+
+.origin-shell.is-collapsed .nav-label,
+.origin-shell.is-collapsed .origin-side-foot select {
+  display: none;
+}
+
+.origin-shell.is-collapsed .origin-logo-row {
+  flex-direction: column;
+}
+
+.origin-shell.is-collapsed .origin-side-link {
+  justify-content: center;
+  padding: 0;
+}
+
+.year-chip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--separator);
+  background: transparent;
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.year-chip.is-on {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
 }
 
 .origin-side-foot {
@@ -274,13 +335,17 @@ input[type='number']::-webkit-inner-spin-button {
 .origin-mobile-nav a {
   flex: 1 0 auto;
   height: 44px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   color: var(--secondary);
+}
+
+.origin-mobile-nav .nav-label {
+  display: none;
 }
 
 .origin-mobile-nav a.is-active {
@@ -304,6 +369,10 @@ input[type='number']::-webkit-inner-spin-button {
     grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     column-gap: var(--gutter);
     padding-right: var(--margin);
+  }
+
+  .origin-shell.is-collapsed {
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 
   .origin-sidebar {
@@ -360,9 +429,18 @@ input[type='number']::-webkit-inner-spin-button {
 
 .wealth-card {
   transform-style: preserve-3d;
-  background: var(--card-grad);
-  box-shadow: var(--card-shadow);
-  transition: transform 0.18s ease-out;
+  color: var(--label);
+  animation: card-turn 8s ease-in-out infinite;
+}
+
+@keyframes card-turn {
+  0%,
+  100% {
+    transform: rotateY(-10deg);
+  }
+  50% {
+    transform: rotateY(10deg);
+  }
 }
 
 .wealth-card-shine {

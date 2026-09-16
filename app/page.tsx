@@ -8,6 +8,7 @@ import { WealthCard } from '@/components/WealthCard';
 import { useWealth } from '@/components/WealthProvider';
 import { budgetTotals } from '@/lib/budget';
 import { centsToDollars, formatCents, labelPercents, toCents, widthPercents } from '@/lib/money';
+import { projectNetCents } from '@/lib/project';
 import { calcIncomeTax } from '@/lib/tax';
 import { EXPENSE_GROUPS, HOLDING_GROUPS, type HoldingKind } from '@/lib/types';
 
@@ -52,6 +53,13 @@ export default function OverviewPage() {
   const assetCents = liquidCents + propertyCents + holdingCentsTotal;
   const netCents = assetCents - liabilityCents;
   const cashflow = budgetTotals(budget);
+  const monthlySave = cashflow.leftover > 0 ? cashflow.leftover : toCents(data.compare.monthlyBudget);
+  const projectedCents = projectNetCents({
+    netCents,
+    years: data.compare.years,
+    annualPct: data.compare.spReturnPct,
+    monthlyCents: monthlySave,
+  });
   const tax = calcIncomeTax({ region: taxRegion, income: taxIncome, deductions: taxDeductions });
 
   const allocation = [
@@ -69,19 +77,44 @@ export default function OverviewPage() {
 
   return (
     <main className="pt-4">
-      <section className="rise flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-        <div>
-          <p className="text-[13px] text-[var(--secondary)]">Net worth</p>
-          <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[48px]">
-            {figure(netCents)}
-          </p>
-          {writeError && (
-            <p className="mt-3 text-[13px] text-[var(--red)]" role="alert">
-              {writeError}
+      <section className="rise flex flex-col items-start gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 flex-wrap items-end gap-8">
+          <div>
+            <p className="text-[13px] text-[var(--secondary)]">Current net worth</p>
+            <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.04em] tabular-nums sm:text-[44px]">
+              {figure(netCents)}
             </p>
-          )}
+          </div>
+          <div>
+            <p className="text-[13px] text-[var(--secondary)]">Projected · {data.compare.years}y</p>
+            <p className="mt-1 text-[28px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-[var(--blue)]">
+              {figure(projectedCents)}
+            </p>
+            <div className="mt-2 flex gap-1">
+              {[5, 10, 20, 30].map((y) => (
+                <button
+                  key={y}
+                  type="button"
+                  className={`year-chip${data.compare.years === y ? ' is-on' : ''}`}
+                  onClick={() => patch((p) => ({ ...p, compare: { ...p.compare, years: y } }))}
+                >
+                  {y}y
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <WealthCard />
+        <WealthCard
+          currentCents={netCents}
+          projectedCents={projectedCents}
+          years={data.compare.years}
+          currency={currency}
+        />
+        {writeError && (
+          <p className="mt-3 w-full text-[13px] text-[var(--red)]" role="alert">
+            {writeError}
+          </p>
+        )}
       </section>
 
       <div className="mt-5">

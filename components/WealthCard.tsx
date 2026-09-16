@@ -1,45 +1,32 @@
 'use client';
 
-import { useRef, type PointerEvent } from 'react';
+import { formatCents } from '@/lib/money';
+import type { CurrencyCode } from '@/lib/currency';
 
-export function WealthCard() {
-  const card = useRef<HTMLDivElement>(null);
-
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    const el = card.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    const ry = (px - 0.5) * 18;
-    const rx = (0.5 - py) * 12;
-    el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-    el.style.setProperty('--shine-x', `${px * 100}%`);
-    el.style.setProperty('--shine-y', `${py * 100}%`);
-    el.classList.add('is-tilting');
-  };
-
-  const reset = () => {
-    const el = card.current;
-    if (!el) return;
-    el.style.transform = '';
-    el.classList.remove('is-tilting');
-  };
-
+export function WealthCard({
+  currentCents,
+  projectedCents,
+  years,
+  currency,
+}: {
+  currentCents: number;
+  projectedCents: number;
+  years: number;
+  currency: CurrencyCode;
+}) {
   return (
-    <div className="card-stage mx-auto w-full max-w-[340px]">
-      <div
-        ref={card}
-        className="wealth-card relative aspect-[1.586] w-full overflow-hidden rounded-[18px] p-6"
-        onPointerMove={onMove}
-        onPointerLeave={reset}
-      >
+    <div className="card-stage w-full max-w-[280px] shrink-0">
+      <div className="wealth-card glass relative aspect-[1.586] w-full overflow-hidden rounded-[20px] p-5">
         <div className="wealth-card-shine pointer-events-none absolute inset-0" />
-        <div className="relative flex h-full flex-col justify-between text-white">
-          <p className="text-[12px] font-semibold tracking-[0.16em] text-white/50">WEALTH</p>
+        <div className="relative flex h-full flex-col justify-between">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-[var(--secondary)]">WEALTH</p>
           <div>
-            <p className="text-[15px] font-medium">Personal</p>
-            <p className="text-[13px] text-white/70">Private holdings · live markets</p>
+            <p className="text-[22px] font-semibold tabular-nums tracking-[-0.03em]">
+              {formatCents(currentCents, currency, 0)}
+            </p>
+            <p className="mt-1 text-[12px] text-[var(--secondary)]">
+              {years}y · {formatCents(projectedCents, currency, 0)}
+            </p>
           </div>
         </div>
       </div>
