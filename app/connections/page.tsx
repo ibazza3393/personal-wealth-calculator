@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useLedger } from '@/components/LedgerProvider';
 import { formatCents, parseDollars, toCents } from '@/lib/money';
+import { mergeAkahuLedger } from '@/lib/providers/akahu-map';
 import type { Connection, ConnectionStatus, Country, ValuationSource } from '@/lib/domain';
 
 const STATUS_COPY: Record<ConnectionStatus, string> = {
@@ -21,6 +22,7 @@ export default function ConnectionsPage() {
   const [source, setSource] = useState<ValuationSource>('manual');
   const [mortgageId, setMortgageId] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const mortgages = useMemo(
     () => ledger.accounts.filter((a) => a.type === 'mortgage'),
@@ -35,12 +37,36 @@ export default function ConnectionsPage() {
     );
   }
 
-  function fakeConnect(kind: 'nz' | 'au') {
-    setNotice(
-      kind === 'nz'
-        ? 'Akahu OAuth is stubbed. Personal app tokens stay server-side; this click does not open a bank login.'
-        : 'AU CDR (Basiq/Fiskil) is stubbed. Consent screens come after the mock home screen.',
-    );
+  async function syncAkahu() {
+    setSyncing(true);
+    setNotice('Syncing Akahu…');
+    try {
+      const res = await fetch('/api/akahu', { method: 'POST' });
+      const json = (await res.json()) as {
+        error?: string;
+        connections?: Parameters<typeof mergeAkahuLedger>[1]['connections'];
+        accounts?: Parameters<typeof mergeAkahuLedger>[1]['accounts'];
+        count?: number;
+      };
+      if (!res.ok) {
+        setNotice(json.error ?? 'Akahu sync failed.');
+        return;
+      }
+      if (!json.connections || !json.accounts) {
+        setNotice('Akahu returned no accounts.');
+        return;
+      }
+      patch((prev) => mergeAkahuLedger(prev, { connections: json.connections!, accounts: json.accounts! }));
+      setNotice(`Synced ${json.count ?? json.accounts.length} NZ accounts. Tokens never left the server.`);
+    } catch {
+      setNotice('Could not reach /api/akahu.');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  function fakeConnectAu() {
+    setNotice('AU CDR (Basiq/Fiskil) is stubbed. Consent screens come after NZ Akahu is live for you.');
   }
 
   function onProperty(e: FormEvent) {
@@ -62,8 +88,7 @@ export default function ConnectionsPage() {
   return (
     <main className="mx-auto max-w-[920px] px-4 pt-6 pb-16 sm:px-5">
       <p className="mb-4 text-[13px] text-[var(--secondary)]">
-        Single user, read-only. NZ banks via Akahu later. AU via a CDR intermediary later. No passwords
-        stored here.
+        Single user, read-only. NZ Personal App is free on Akahu. Tokens stay in `.env.local`, never in the browser.
       </p>
 
       {notice && (
@@ -73,10 +98,10 @@ export default function ConnectionsPage() {
       )}
 
       <div className="mb-6 flex flex-wrap gap-2">
-        <button type="button" className="origin-btn" onClick={() => fakeConnect('nz')}>
+        <button type="button" className="origin-btn" disabled={syncing} onClick={() => void syncAkahu()}>
           Connect NZ bank (Akahu)
         </button>
-        <button type="button" className="origin-btn" onClick={() => fakeConnect('au')}>
+        <button type="button" className="origin-btn" onClick={fakeConnectAu}>
           Connect AU bank (CDR)
         </button>
         <button type="button" className="origin-btn-ghost" onClick={resetMock}>

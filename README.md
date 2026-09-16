@@ -12,6 +12,17 @@ KiwiSaver is **not** on official NZ open banking. This repo will not scrape prov
 
 Hybrid: keep Next on Vercel (quotes API). Native is a Capacitor WebView of that URL — see `native/README.md`. Add to Home Screen works via `manifest.webmanifest`.
 
+## Akahu Personal App (free, you only)
+
+Akahu does not charge for a Personal App that reads **your** accounts (1 user, no payments, daily refresh).
+
+1. Create a profile and connect a bank at [my.akahu.nz](https://my.akahu.nz).
+2. Developers page → Personal App → copy **App ID Token** and **User Access Token**.
+3. Copy `.env.example` to `.env.local` (never commit it).
+4. `npm run dev` → Connections → **Connect NZ bank (Akahu)**.
+
+Tokens are used only in `app/api/akahu/route.ts`. Do not put them on the public Vercel project without `WEALTH_PERSONAL_KEY` — that URL would otherwise expose your balances.
+
 ## What it does
 
 - **Private by design** — calculations and storage run only on the client.

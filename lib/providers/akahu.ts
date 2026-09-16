@@ -3,7 +3,7 @@ import { AdapterNotConnectedError, type BankAdapter } from './types';
 /**
  * NZ bank pipe. Official open banking via Akahu (accredited requestor).
  * KiwiSaver and managed funds are NOT on official bank APIs — use CSV/manual.
- * Tokens live server-side later. This stub never sees passwords.
+ * Tokens live in AKAHU_* env on the server. Personal App: my.akahu.nz/developers.
  */
 export const akahuAdapter: BankAdapter = {
   id: 'akahu',
