@@ -40,7 +40,7 @@ export function LedgerStrip() {
   const aud = (n: number) => formatCents(toCents(n), 'AUD', 0);
 
   return (
-    <section className="panel rise mb-4 rounded-[20px] px-5 py-4">
+    <section className="panel rise mb-4 rounded-[26px] px-5 py-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--blue)]">

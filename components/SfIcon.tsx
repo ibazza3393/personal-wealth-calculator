@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 type Name =
   | 'square.grid.2x2'
   | 'chart.bar'
@@ -8,33 +10,62 @@ type Name =
   | 'sidebar.left'
   | 'sidebar.right';
 
-const PATHS: Record<Name, string> = {
-  'square.grid.2x2':
-    'M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z',
-  'chart.bar': 'M5 19V9h3v10H5Zm6 0V5h3v14h-3Zm6 0v-7h3v7h-3Z',
-  link: 'M9.5 14.5 8 16a4 4 0 0 1-5.5-5.5L4 9m10.5.5L16 8a4 4 0 0 1 5.5 5.5L20 15M8.5 12h7',
-  creditcard: 'M3 7h18v10H3V7Zm0 3h18',
-  'arrow.left.arrow.right': 'M7 8H3m0 0 3-3M3 8l3 3M17 16h4m0 0-3-3m3 3-3 3',
-  'chart.line.uptrend.xyaxis': 'M4 19V5m0 14h16M7 14l4-4 3 2 5-6',
-  'sidebar.left': 'M4 5h16v14H4V5Zm6 0v14',
-  'sidebar.right': 'M4 5h16v14H4V5Zm10 0v14',
-};
-
 export function SfIcon({ name, className }: { name: Name; className?: string }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      width="22"
+      height="22"
+      fill="currentColor"
       aria-hidden
     >
-      <path d={PATHS[name]} />
+      {GLYPH[name]}
     </svg>
   );
 }
+
+const GLYPH: Record<Name, ReactNode> = {
+  'square.grid.2x2': (
+    <>
+      <rect x="3" y="3" width="8" height="8" rx="1.75" />
+      <rect x="13" y="3" width="8" height="8" rx="1.75" />
+      <rect x="3" y="13" width="8" height="8" rx="1.75" />
+      <rect x="13" y="13" width="8" height="8" rx="1.75" />
+    </>
+  ),
+  'chart.bar': (
+    <>
+      <rect x="4" y="11" width="4.5" height="10" rx="1.25" />
+      <rect x="9.75" y="4" width="4.5" height="17" rx="1.25" />
+      <rect x="15.5" y="8" width="4.5" height="13" rx="1.25" />
+    </>
+  ),
+  link: (
+    <path d="M9.2 14.8a4.2 4.2 0 0 1 0-5.9l1.1-1.1a4.2 4.2 0 0 1 5.9 5.9l-.8.8a1.15 1.15 0 1 1-1.6-1.6l.8-.8a1.9 1.9 0 1 0-2.7-2.7l-1.1 1.1a1.9 1.9 0 0 0 0 2.7 1.15 1.15 0 1 1-1.6 1.6Zm5.6-5.6a4.2 4.2 0 0 1 0 5.9l-1.1 1.1a4.2 4.2 0 1 1-5.9-5.9l.8-.8a1.15 1.15 0 1 1 1.6 1.6l-.8.8a1.9 1.9 0 1 0 2.7 2.7l1.1-1.1a1.9 1.9 0 0 0 0-2.7 1.15 1.15 0 0 1 1.6-1.6Z" />
+  ),
+  creditcard: (
+    <>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="2.25" />
+      <rect x="2.5" y="9" width="19" height="2.25" fill="#fff" fillOpacity="0.35" />
+    </>
+  ),
+  'arrow.left.arrow.right': (
+    <path d="M8.2 7.2 5.4 10l2.8 2.8a1.05 1.05 0 0 1-1.5 1.5L3.1 10.7a1.6 1.6 0 0 1 0-2.3l3.6-3.6a1.05 1.05 0 0 1 1.5 1.5ZM15.8 16.8 18.6 14l-2.8-2.8a1.05 1.05 0 0 1 1.5-1.5l3.6 3.6a1.6 1.6 0 0 1 0 2.3l-3.6 3.6a1.05 1.05 0 0 1-1.5-1.5ZM6.2 9.2h11.6a1.15 1.15 0 0 1 0 2.3H6.2a1.15 1.15 0 0 1 0-2.3Z" />
+  ),
+  'chart.line.uptrend.xyaxis': (
+    <path d="M4.2 4.2a1.15 1.15 0 0 1 2.3 0V18.5h13.3a1.15 1.15 0 0 1 0 2.3H5.2A2.1 2.1 0 0 1 3.1 18.7V4.2h1.1Zm14.2 3.1-4.7 4.7-2.2-2.2a1.15 1.15 0 0 0-1.7.1L6.6 13.4a1.15 1.15 0 0 0 1.7 1.5l2.4-2.7 2.3 2.3a1.15 1.15 0 0 0 1.6 0l5.5-5.5a1.15 1.15 0 0 0-1.6-1.6Z" />
+  ),
+  'sidebar.left': (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2.25" />
+      <rect x="5.1" y="6" width="4.2" height="12" rx="1" fill="#fff" fillOpacity="0.35" />
+    </>
+  ),
+  'sidebar.right': (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2.25" />
+      <rect x="14.7" y="6" width="4.2" height="12" rx="1" fill="#fff" fillOpacity="0.35" />
+    </>
+  ),
+};

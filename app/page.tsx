@@ -258,7 +258,7 @@ export default function OverviewPage() {
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel rounded-[16px] px-4 py-3">
+    <div className="panel rounded-[26px] px-4 py-3">
       <p className="text-[12px] text-[var(--secondary)]">{label}</p>
       <p className="mt-1 text-[17px] font-semibold tracking-tight tabular-nums">{value}</p>
     </div>
