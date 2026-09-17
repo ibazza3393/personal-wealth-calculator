@@ -2,7 +2,7 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?repository-url=https%3A%2F%2Fgithub.com%2Fibazza3393%2Fpersonal-wealth-calculator)
 
-A local-first NZ/AU net worth dashboard. Figures stay in this browser until you connect Akahu.
+A local-first NZ/AU net worth dashboard. Figures stay in this browser until you connect Akahu. Google sign-in is identity only — holdings are not uploaded.
 
 ## ANZ ledger (single user)
 
@@ -43,9 +43,13 @@ npm run dev
 
 Money helpers: `npx tsx lib/money.test.ts`
 
+## Sign in (Google)
+
+Uses Supabase Auth. Put `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` (and Vercel). Never commit values. Apple SSO is off until a Services ID exists.
+
 ## Deploy
 
-Import the GitHub repo in Vercel. No env vars.
+Import the GitHub repo in Vercel. Quotes need no env. Google sign-in needs the two `NEXT_PUBLIC_SUPABASE_*` names above (values from the Vercel ↔ Supabase integration, not from git).
 
 ## Layout
 

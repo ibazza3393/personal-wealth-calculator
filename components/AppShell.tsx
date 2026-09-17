@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useSyncExternalStore } from 'react';
+import { AuthButton } from '@/components/AuthButton';
 import { SfIcon } from '@/components/SfIcon';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CURRENCIES, type CurrencyCode } from '@/lib/currency';
@@ -112,6 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </option>
               ))}
             </select>
+            <AuthButton />
             <ThemeToggle />
           </div>
         </aside>
@@ -144,6 +146,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </option>
                   ))}
                 </select>
+                <AuthButton />
                 <ThemeToggle />
               </div>
             </header>
