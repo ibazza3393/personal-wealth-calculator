@@ -2,7 +2,57 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Apple HIG type + color tokens for Tailwind 4 utilities. SF Pro is the
+   system stack on Apple devices — we do not ship the font file. */
+@theme {
+  --font-sans:
+    "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+  --font-display:
+    "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --text-caption-2: 11px;
+  --text-caption-2--line-height: 13px;
+  --text-caption-1: 12px;
+  --text-caption-1--line-height: 16px;
+  --text-footnote: 13px;
+  --text-footnote--line-height: 18px;
+  --text-subheadline: 15px;
+  --text-subheadline--line-height: 20px;
+  --text-callout: 16px;
+  --text-callout--line-height: 21px;
+  --text-body: 17px;
+  --text-body--line-height: 22px;
+  --text-headline: 17px;
+  --text-headline--line-height: 22px;
+  --text-title-3: 20px;
+  --text-title-3--line-height: 25px;
+  --text-title-2: 22px;
+  --text-title-2--line-height: 28px;
+  --text-title-1: 28px;
+  --text-title-1--line-height: 34px;
+  --text-large-title: 34px;
+  --text-large-title--line-height: 41px;
+
+  --color-bg: #e8eaf0;
+  --color-elevated: #ffffff;
+  --color-label: #1d1d1f;
+  --color-secondary-label: #6e6e73;
+  --color-tertiary-label: #86868b;
+  --color-separator: rgb(60 60 67 / 0.12);
+  --color-system-blue: #0071e3;
+  --color-system-green: #248a3d;
+  --color-system-red: #de3b30;
+
+  --radius-chrome: 20px;
+  --radius-glass: 26px;
+  --spacing-measure: 960px;
+  --spacing-sidebar: 220px;
+  --breakpoint-regular: 768px;
+}
+
 :root {
+  color-scheme: light;
   --bg: #e8eaf0;
   --elevated: #ffffff;
   --label: #1d1d1f;
@@ -19,6 +69,8 @@
   --glass-fill: rgba(255, 255, 255, 0.58);
   --glass-edge: rgba(255, 255, 255, 0.72);
   --glass-text: rgba(0, 0, 0, 0.06);
+  --glass-card-fill: rgba(255, 255, 255, 0.34);
+  --glass-card-edge: rgba(255, 255, 255, 0.48);
   --orb-a: #9ecbff;
   --orb-b: #f5d0c5;
   --orb-c: #c8f0d8;
@@ -31,9 +83,58 @@
   --gutter: 8px;
   --measure: 960px;
   --margin: 16px;
+  --text-caption-2: 11px;
+  --leading-caption-2: 13px;
+  --text-caption-1: 12px;
+  --leading-caption-1: 16px;
+  --text-footnote: 13px;
+  --leading-footnote: 18px;
+  --text-subheadline: 15px;
+  --leading-subheadline: 20px;
+  --text-callout: 16px;
+  --leading-callout: 21px;
+  --text-body: 17px;
+  --leading-body: 22px;
+  --text-headline: 17px;
+  --leading-headline: 22px;
+  --text-title-3: 20px;
+  --leading-title-3: 25px;
+  --text-title-2: 22px;
+  --leading-title-2: 28px;
+  --text-title-1: 28px;
+  --leading-title-1: 34px;
+  --text-large-title: 34px;
+  --leading-large-title: 41px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #000000;
+    --elevated: #1c1c1e;
+    --label: #f5f5f7;
+    --secondary: #a1a1a6;
+    --tertiary: #6e6e73;
+    --separator: rgba(84, 84, 88, 0.45);
+    --blue: #0a84ff;
+    --green: #30d158;
+    --red: #ff453a;
+    --ring-track: rgba(84, 84, 88, 0.45);
+    --card-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+    --card-grad: linear-gradient(155deg, #3a3a3c 0%, #1c1c1e 50%, #2c2c2e 100%);
+    --glass-fill: rgba(28, 28, 30, 0.55);
+    --glass-edge: rgba(255, 255, 255, 0.14);
+    --glass-text: rgba(255, 255, 255, 0.08);
+    --glass-card-fill: rgba(40, 40, 44, 0.42);
+    --glass-card-edge: rgba(255, 255, 255, 0.14);
+    --orb-a: #1c3f73;
+    --orb-b: #3b2a55;
+    --orb-c: #16382c;
+  }
 }
 
 .dark {
+  color-scheme: dark;
   --bg: #000000;
   --elevated: #1c1c1e;
   --label: #f5f5f7;
@@ -50,10 +151,35 @@
   --glass-fill: rgba(28, 28, 30, 0.55);
   --glass-edge: rgba(255, 255, 255, 0.14);
   --glass-text: rgba(255, 255, 255, 0.08);
+  --glass-card-fill: rgba(40, 40, 44, 0.42);
+  --glass-card-edge: rgba(255, 255, 255, 0.14);
   --orb-a: #1c3f73;
   --orb-b: #3b2a55;
   --orb-c: #16382c;
-  color-scheme: dark;
+}
+
+/* Explicit light wins over prefers-color-scheme when the user toggles. */
+.light {
+  color-scheme: light;
+  --bg: #e8eaf0;
+  --elevated: #ffffff;
+  --label: #1d1d1f;
+  --secondary: #6e6e73;
+  --tertiary: #86868b;
+  --separator: rgba(60, 60, 67, 0.12);
+  --blue: #0071e3;
+  --green: #248a3d;
+  --red: #de3b30;
+  --ring-track: rgba(60, 60, 67, 0.12);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
+  --glass-fill: rgba(255, 255, 255, 0.58);
+  --glass-edge: rgba(255, 255, 255, 0.72);
+  --glass-text: rgba(0, 0, 0, 0.06);
+  --glass-card-fill: rgba(255, 255, 255, 0.34);
+  --glass-card-edge: rgba(255, 255, 255, 0.48);
+  --orb-a: #9ecbff;
+  --orb-b: #f5d0c5;
+  --orb-c: #c8f0d8;
 }
 
 html,
@@ -64,14 +190,7 @@ body {
 }
 
 body {
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "SF Pro Text",
-    "Segoe UI",
-    Helvetica,
-    Arial,
-    sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -129,7 +248,7 @@ input[type='number']::-webkit-inner-spin-button {
   background: var(--orb-c);
 }
 
-.glass {
+@utility liquid-glass-chrome {
   background: var(--glass-fill);
   backdrop-filter: saturate(190%) blur(32px);
   -webkit-backdrop-filter: saturate(190%) blur(32px);
@@ -139,7 +258,30 @@ input[type='number']::-webkit-inner-spin-button {
     0 8px 28px rgba(0, 0, 0, 0.08);
 }
 
-.dark .glass {
+@utility liquid-glass-card {
+  background: var(--glass-card-fill);
+  backdrop-filter: saturate(180%) blur(40px);
+  -webkit-backdrop-filter: saturate(180%) blur(40px);
+  border: 0.5px solid var(--glass-card-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.glass,
+.liquid-glass-chrome {
+  background: var(--glass-fill);
+  backdrop-filter: saturate(190%) blur(32px);
+  -webkit-backdrop-filter: saturate(190%) blur(32px);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass,
+.dark .liquid-glass-chrome {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 10px 32px rgba(0, 0, 0, 0.45);
@@ -474,20 +616,20 @@ input[type='number']::-webkit-inner-spin-button {
   }
 }
 
-.panel {
-  background: rgba(255, 255, 255, 0.34);
+.panel,
+.liquid-glass-card {
+  background: var(--glass-card-fill);
   backdrop-filter: saturate(180%) blur(40px);
   -webkit-backdrop-filter: saturate(180%) blur(40px);
-  border: 0.5px solid rgba(255, 255, 255, 0.48);
+  border: 0.5px solid var(--glass-card-edge);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.62),
     inset 0 -1px 0 rgba(0, 0, 0, 0.06),
     0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-.dark .panel {
-  background: rgba(40, 40, 44, 0.42);
-  border: 0.5px solid rgba(255, 255, 255, 0.14);
+.dark .panel,
+.dark .liquid-glass-card {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 -4px 12px rgba(0, 0, 0, 0.18),
@@ -651,7 +793,10 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass {
+  .glass,
+  .liquid-glass-chrome,
+  .panel,
+  .liquid-glass-card {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--elevated);

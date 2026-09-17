@@ -21,17 +21,23 @@ function readTheme(): Theme {
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.documentElement.classList.toggle('light', theme === 'light');
 }
 
 const listeners = new Set<() => void>();
 
 function subscribe(onChange: () => void) {
   listeners.add(onChange);
+  applyTheme(readTheme());
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   const onMq = () => {
     try {
-      if (!window.localStorage.getItem(THEME_KEY)) onChange();
+      if (!window.localStorage.getItem(THEME_KEY)) {
+        applyTheme(readTheme());
+        onChange();
+      }
     } catch {
+      applyTheme(readTheme());
       onChange();
     }
   };

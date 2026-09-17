@@ -26,7 +26,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const THEME_BOOT = `(function(){try{var t=localStorage.getItem('wealth-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+const THEME_BOOT = `(function(){try{var t=localStorage.getItem('wealth-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);}catch(e){}})();`;
 
 export default function RootLayout({
   children,

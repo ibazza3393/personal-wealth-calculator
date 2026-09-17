@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <span className="lg-orb lg-orb-c" />
       </div>
       <div className={`origin-shell${collapsed ? ' is-collapsed' : ''}`}>
-        <aside className="origin-sidebar glass">
+        <aside className="origin-sidebar glass liquid-glass-chrome">
           <div className="origin-logo-row">
             <Link href="/" className="origin-logo">
               W
@@ -118,7 +118,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="origin-body">
           <div className="origin-col">
-            <header className="origin-topbar glass">
+            <header className="origin-topbar glass liquid-glass-chrome">
               <h1>
                 {title} · Planning
               </h1>
@@ -150,7 +150,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="origin-content">{children}</div>
           </div>
 
-          <nav className="origin-mobile-nav glass" aria-label="Pages">
+          <nav className="origin-mobile-nav glass liquid-glass-chrome" aria-label="Pages">
             {LINKS.map((link) => {
               const active = pathname === link.href;
               return (
