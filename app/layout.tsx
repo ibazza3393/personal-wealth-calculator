@@ -5,13 +5,13 @@ import { LedgerProvider } from '@/components/LedgerProvider';
 import { WealthProvider } from '@/components/WealthProvider';
 
 export const metadata: Metadata = {
-  title: 'Wealth',
+  title: 'Next Wealth',
   description:
     'Private NZ/AU net worth. Holdings stay in your browser. Banks via Akahu later — never passwords.',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
-    title: 'Wealth',
+    title: 'Next Wealth',
     statusBarStyle: 'default',
   },
 };

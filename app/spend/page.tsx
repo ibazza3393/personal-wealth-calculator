@@ -176,7 +176,7 @@ export default function SpendPage() {
       })}
 
       <div className="mt-8 flex justify-center">
-        <button type="button" onClick={loadDemo} className="text-[17px] text-[var(--blue)]">
+        <button type="button" onClick={loadDemo} className="hit px-3 text-[17px] text-[var(--blue)]">
           Load sample spend
         </button>
       </div>
