@@ -11,7 +11,7 @@ import { SIDEBAR_KEY } from '@/lib/types';
 import { useWealth } from '@/components/WealthProvider';
 
 const LINKS = [
-  { href: '/', label: 'Overview', icon: 'square.grid.2x2' as const },
+  { href: '/dashboard', label: 'Overview', icon: 'square.grid.2x2' as const },
   { href: '/holdings', label: 'Holdings', icon: 'chart.bar' as const },
   { href: '/connections', label: 'Connections', icon: 'link' as const },
   { href: '/spend', label: 'Spend', icon: 'creditcard' as const },
@@ -54,19 +54,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     listeners.forEach((fn) => fn());
   }, []);
 
+  const scene = (
+    <div className="lg-scene" aria-hidden>
+      <span className="lg-orb lg-orb-a" />
+      <span className="lg-orb lg-orb-b" />
+      <span className="lg-orb lg-orb-c" />
+    </div>
+  );
+
+  // The landing page brings its own chrome — no sidebar, topbar or tab bar.
+  if (pathname === '/') {
+    return (
+      <>
+        {scene}
+        {children}
+      </>
+    );
+  }
+
   return (
     <>
-      <div className="lg-scene" aria-hidden>
-        <span className="lg-orb lg-orb-a" />
-        <span className="lg-orb lg-orb-b" />
-        <span className="lg-orb lg-orb-c" />
-      </div>
+      {scene}
       <div className={`origin-shell${collapsed ? ' is-collapsed' : ''}`}>
         <aside className="origin-sidebar glass liquid-glass-chrome">
           <div className="origin-logo-row">
-            <Link href="/" className="origin-logo">
-              W
-              <span className="nav-label">ealth</span>
+            <Link href="/dashboard" className="origin-logo">
+              N
+              <span className="nav-label">ext Wealth</span>
             </Link>
             <button
               type="button"
