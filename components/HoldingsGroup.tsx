@@ -7,7 +7,7 @@ import type { CurrencyCode } from '@/lib/currency';
 import type { Holding } from '@/lib/types';
 
 export function Hairline() {
-  return <div className="h-px bg-[var(--separator)]" />;
+  return <div className="h-px bg-[var(--separators,#e6e6e6)] dark:bg-[rgba(84,84,88,0.65)]" />;
 }
 
 export function Row({
@@ -26,10 +26,10 @@ export function Row({
   currency?: CurrencyCode;
 }) {
   return (
-    <div className="flex min-h-[52px] items-center gap-3 px-4 py-2">
+    <div className="flex min-h-[68px] items-center gap-4 px-4">
       <div className="min-w-0 flex-1">
-        <p className="text-[17px] leading-tight">{label}</p>
-        <p className="text-[13px] text-[var(--secondary)]">{caption}</p>
+        <p className="text-[17px] leading-[22px] tracking-[-0.43px]">{label}</p>
+        <p className="text-[13px] leading-[18px] text-[var(--secondary)]">{caption}</p>
       </div>
       <CurrencyInput
         cents={cents}
@@ -60,14 +60,14 @@ export function EditableRow({
   currency?: CurrencyCode;
 }) {
   return (
-    <div className="flex min-h-[52px] items-center gap-2 px-4">
+    <div className="flex min-h-[52px] items-center gap-4 px-4">
       <input
         type="text"
         value={name}
         disabled={disabled}
         onChange={(e) => onName(e.target.value.slice(0, 80))}
         aria-label="Name"
-        className="min-w-0 flex-1 bg-transparent text-[17px] text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40"
+        className="min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40"
         placeholder="Name"
       />
       <CurrencyInput
@@ -119,7 +119,7 @@ export function PricedRow({
   currency: CurrencyCode;
 }) {
   return (
-    <div className="flex min-h-[56px] items-center gap-3 px-4 py-2">
+    <div className="flex min-h-[68px] items-center gap-4 px-4">
       <div className="min-w-0 flex-1">
         <input
           type="text"
@@ -128,7 +128,7 @@ export function PricedRow({
           onChange={(e) => onName(e.target.value.slice(0, 80))}
           aria-label="Name"
           placeholder="Name"
-          className="w-full bg-transparent text-[17px] outline-none placeholder:text-[var(--tertiary)]"
+          className="w-full bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] outline-none placeholder:text-[var(--tertiary)]"
         />
         <div className="mt-0.5 flex items-center gap-2 text-[13px] text-[var(--secondary)]">
           <input
@@ -156,7 +156,7 @@ export function PricedRow({
       </div>
       <div className="text-right">
         {units ? (
-          <p className="text-[17px] tabular-nums">{liveLabel}</p>
+          <p className="text-[17px] leading-[22px] tabular-nums tracking-[-0.43px]">{liveLabel}</p>
         ) : (
           <CurrencyInput
             cents={fallbackCents}
@@ -214,8 +214,8 @@ export function HoldingsGroup({
 }) {
   return (
     <>
-      <p className="mb-2 mt-6 text-[13px] font-semibold text-[var(--secondary)]">{title}</p>
-      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
+      <p className="mb-2 mt-6 text-[13px] font-semibold leading-[18px] text-[var(--secondary)]">{title}</p>
+      <div className="overflow-hidden rounded-[26px] bg-[var(--elevated)]">
         {items.length === 0 && <p className="px-4 py-3.5 text-[15px] text-[var(--tertiary)]">{empty}</p>}
         {items.map((item, i) => (
           <div key={item.id}>
@@ -255,7 +255,7 @@ export function HoldingsGroup({
             <button
               type="button"
               onClick={onAdd}
-              className="flex h-11 w-full items-center px-4 text-left text-[17px] text-[var(--blue)]"
+              className="flex h-[52px] w-full items-center px-4 text-left text-[17px] leading-[22px] text-[var(--blue)]"
             >
               {add}
             </button>

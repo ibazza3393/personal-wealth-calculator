@@ -39,8 +39,8 @@ export default function HoldingsPage() {
 
   return (
     <main className="pt-4">
-      <p className="mb-2 text-[13px] font-semibold text-[var(--secondary)]">Core</p>
-      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
+      <p className="mb-2 text-[13px] font-semibold leading-[18px] text-[var(--secondary)]">Core</p>
+      <div className="overflow-hidden rounded-[26px] bg-[var(--elevated)]">
         <Row
           label="Liquid cash"
           caption="Checking, savings"
@@ -108,8 +108,8 @@ export default function HoldingsPage() {
         />
       ))}
 
-      <p className="mb-2 mt-6 text-[13px] font-semibold text-[var(--secondary)]">Liabilities</p>
-      <div className="overflow-hidden rounded-[12px] bg-[var(--elevated)]">
+      <p className="mb-2 mt-6 text-[13px] font-semibold leading-[18px] text-[var(--secondary)]">Liabilities</p>
+      <div className="overflow-hidden rounded-[26px] bg-[var(--elevated)]">
         {liabilities.length === 0 && (
           <p className="px-4 py-3.5 text-[15px] text-[var(--tertiary)]">No loans or cards yet</p>
         )}
@@ -157,7 +157,7 @@ export default function HoldingsPage() {
                   },
             )
           }
-          className="flex h-11 w-full items-center px-4 text-left text-[17px] text-[var(--blue)]"
+          className="flex h-[52px] w-full items-center px-4 text-left text-[17px] leading-[22px] text-[var(--blue)]"
         >
           Add liability
         </button>
