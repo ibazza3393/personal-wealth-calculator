@@ -67,7 +67,7 @@ export function EditableRow({
         disabled={disabled}
         onChange={(e) => onName(e.target.value.slice(0, 80))}
         aria-label="Name"
-        className="min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40"
+        className="min-h-[44px] min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] text-[var(--label)] outline-none placeholder:text-[var(--tertiary)] disabled:opacity-40"
         placeholder="Name"
       />
       <CurrencyInput
@@ -96,6 +96,7 @@ export function PricedRow({
   liveLabel,
   fallbackCents,
   tickerPlaceholder,
+  unitLabel,
   onName,
   onSymbol,
   onUnits,
@@ -110,6 +111,7 @@ export function PricedRow({
   liveLabel: string;
   fallbackCents: number;
   tickerPlaceholder: string;
+  unitLabel: string;
   onName: (name: string) => void;
   onSymbol: (symbol: string) => void;
   onUnits: (units: number) => void;
@@ -128,7 +130,7 @@ export function PricedRow({
           onChange={(e) => onName(e.target.value.slice(0, 80))}
           aria-label="Name"
           placeholder="Name"
-          className="w-full bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] outline-none placeholder:text-[var(--tertiary)]"
+          className="min-h-[30px] w-full bg-transparent text-[17px] leading-[22px] tracking-[-0.43px] outline-none placeholder:text-[var(--tertiary)]"
         />
         <div className="mt-0.5 flex items-center gap-2 text-[13px] text-[var(--secondary)]">
           <input
@@ -138,7 +140,7 @@ export function PricedRow({
             onChange={(e) => onSymbol(e.target.value.toUpperCase().slice(0, 8))}
             aria-label="Symbol"
             placeholder={tickerPlaceholder}
-            className="w-16 bg-transparent font-medium tracking-wide outline-none placeholder:text-[var(--tertiary)]"
+            className="min-h-[30px] w-16 bg-transparent font-medium tracking-wide outline-none placeholder:text-[var(--tertiary)]"
           />
           <span aria-hidden>·</span>
           <input
@@ -149,9 +151,9 @@ export function PricedRow({
             onChange={(e) => onUnits(parseUnits(e.target.value))}
             aria-label="Units"
             placeholder="0"
-            className="w-16 bg-transparent tabular-nums outline-none placeholder:text-[var(--tertiary)]"
+            className="min-h-[30px] w-16 bg-transparent tabular-nums outline-none placeholder:text-[var(--tertiary)]"
           />
-          <span>sh</span>
+          <span>{unitLabel}</span>
         </div>
       </div>
       <div className="text-right">
@@ -187,6 +189,7 @@ export function HoldingsGroup({
   disabled,
   priced,
   tickerPlaceholder,
+  unitLabel = 'sh',
   currency,
   liveLabel,
   onAdd,
@@ -203,6 +206,7 @@ export function HoldingsGroup({
   disabled: boolean;
   priced?: boolean;
   tickerPlaceholder: string;
+  unitLabel?: string;
   currency: CurrencyCode;
   liveLabel: (item: Holding) => string;
   onAdd: () => void;
@@ -228,6 +232,7 @@ export function HoldingsGroup({
                 liveLabel={liveLabel(item)}
                 fallbackCents={toCents(item.value)}
                 tickerPlaceholder={tickerPlaceholder}
+                unitLabel={unitLabel}
                 currency={currency}
                 disabled={disabled}
                 onName={(name) => onName(item.id, name)}

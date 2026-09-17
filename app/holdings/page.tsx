@@ -7,8 +7,15 @@ import { MAX_ITEMS } from '@/lib/sanitize';
 import { DEFAULT_COMPARE, HOLDING_GROUPS, type Holding, type HoldingKind } from '@/lib/types';
 
 export default function HoldingsPage() {
-  const { data, patch, clearValue, isHydrated, holdingValue } = useWealth();
+  const { data, patch, clearValue, isHydrated, holdingValue, quotes } = useWealth();
   const { liquidCash, propertyValue, holdings, liabilities, currency } = data;
+
+  // A holding priced off a ticker is worth nothing we can show until its quote
+  // lands. Rendering $0 would read as "this is empty" rather than "not priced
+  // yet", so those rows show an em dash instead.
+  const pricedSymbols = new Set(quotes.map((q) => q.symbol.toUpperCase()));
+  const awaitingPrice = (item: Holding) =>
+    Boolean(item.symbol && (item.units ?? 0) > 0 && !pricedSymbols.has(item.symbol.toUpperCase()));
 
   const addHolding = (kind: HoldingKind, name: string, symbol?: string) =>
     patch((prev) => {
@@ -67,11 +74,14 @@ export default function HoldingsPage() {
           empty={group.empty}
           add={group.add}
           priced={group.priced}
+          unitLabel={group.kind === 'bitcoin' || group.kind === 'crypto' ? 'units' : 'sh'}
           tickerPlaceholder={group.kind === 'bitcoin' ? 'BTC' : group.kind === 'crypto' ? 'ETH' : 'AAPL'}
           currency={currency}
           items={holdings.filter((h) => h.kind === group.kind)}
           disabled={!isHydrated}
-          liveLabel={(item) => formatCents(holdingValue(item), currency)}
+          liveLabel={(item) =>
+            awaitingPrice(item) ? '—' : formatCents(holdingValue(item), currency)
+          }
           onAdd={() => addHolding(group.kind, '', group.kind === 'bitcoin' ? 'BTC' : undefined)}
           onName={(id, name) =>
             patch((p) => ({
@@ -164,7 +174,7 @@ export default function HoldingsPage() {
       </div>
 
       <div className="mt-8 flex justify-center gap-6 text-[17px]">
-        <button type="button" onClick={loadDemo} className="text-[var(--blue)]">
+        <button type="button" onClick={loadDemo} className="hit px-3 text-[var(--blue)]">
           Load sample
         </button>
         <button
@@ -172,7 +182,7 @@ export default function HoldingsPage() {
           onClick={() => {
             if (window.confirm('Clear every figure saved on this device?')) clearValue();
           }}
-          className="text-[var(--red)]"
+          className="hit px-3 text-[var(--red)]"
         >
           Clear
         </button>

@@ -133,6 +133,13 @@ export default function OverviewPage() {
               {quotesError ? 'Offline' : quotesAsOf ? 'Live' : 'Loading'}
             </span>
           </div>
+          {ticker.length === 0 ? (
+            <p className="text-[15px] text-[var(--tertiary)]">
+              {quotesError
+                ? 'Prices are unavailable right now. Holdings priced from a ticker are left out of the totals above.'
+                : 'Fetching prices…'}
+            </p>
+          ) : (
           <div className="grid grid-cols-3 gap-4">
             {ticker.map((q) => (
               <div key={q.symbol}>
@@ -150,6 +157,7 @@ export default function OverviewPage() {
               </div>
             ))}
           </div>
+          )}
         </section>
 
         <section className="panel liquid-glass-card rise rise-2 rounded-[26px] px-5 py-5">

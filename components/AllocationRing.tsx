@@ -42,8 +42,8 @@ export function AllocationRing({ segments, totalCents, format, hydrated }: Props
   let cursor = start0;
 
   return (
-    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-8">
-      <div className="relative h-[220px] w-[220px] shrink-0">
+    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
+      <div className="relative h-[168px] w-[168px] shrink-0 sm:h-[196px] sm:w-[196px]">
         <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full" aria-hidden>
           <path
             d={wedge(cx, cx, rInner, rOuter, 0, TAU - 0.001)}
@@ -73,8 +73,9 @@ export function AllocationRing({ segments, totalCents, format, hydrated }: Props
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: seg.color }} />
               <span className="truncate">{seg.label}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-[var(--secondary)]">
-              {hydrated ? `${seg.percent}%   ${format(seg.cents)}` : '—'}
+            <span className="flex shrink-0 items-baseline gap-2 text-[13px] tabular-nums text-[var(--secondary)]">
+              <span className="w-8 text-right">{hydrated ? `${seg.percent}%` : '—'}</span>
+              <span className="text-[var(--label)]">{hydrated ? format(seg.cents) : '—'}</span>
             </span>
           </li>
         ))}

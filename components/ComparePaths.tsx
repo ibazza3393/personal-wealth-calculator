@@ -119,7 +119,12 @@ export function ComparePaths({
         />
       </div>
 
-      <div className="compare-grid panel mt-6 overflow-x-auto rounded-[24px]">
+      <p className="compare-hint" aria-hidden>
+        Swipe the table to compare renting and the index →
+      </p>
+
+      <div className="compare-scroll panel mt-2 rounded-[24px]">
+        <div className="compare-grid">
         <div className="compare-row compare-head">
           <div className="compare-label text-[13px] font-medium text-[var(--secondary)]">
             After {value.years} years
@@ -149,6 +154,7 @@ export function ComparePaths({
             ))}
           </div>
         ))}
+        </div>
       </div>
     </section>
   );

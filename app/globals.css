@@ -70,6 +70,7 @@
   --glass-edge: rgba(255, 255, 255, 0.72);
   --glass-text: rgba(0, 0, 0, 0.06);
   --glass-card-fill: rgba(255, 255, 255, 0.34);
+  --glass-card-base: rgba(255, 255, 255, 0.42);
   --glass-card-edge: rgba(255, 255, 255, 0.48);
   --orb-a: #9ecbff;
   --orb-b: #f5d0c5;
@@ -126,6 +127,7 @@
     --glass-edge: rgba(255, 255, 255, 0.14);
     --glass-text: rgba(255, 255, 255, 0.08);
     --glass-card-fill: rgba(40, 40, 44, 0.42);
+    --glass-card-base: rgba(28, 28, 30, 0.44);
     --glass-card-edge: rgba(255, 255, 255, 0.14);
     --orb-a: #1c3f73;
     --orb-b: #3b2a55;
@@ -152,6 +154,7 @@
   --glass-edge: rgba(255, 255, 255, 0.14);
   --glass-text: rgba(255, 255, 255, 0.08);
   --glass-card-fill: rgba(40, 40, 44, 0.42);
+  --glass-card-base: rgba(28, 28, 30, 0.44);
   --glass-card-edge: rgba(255, 255, 255, 0.14);
   --orb-a: #1c3f73;
   --orb-b: #3b2a55;
@@ -176,6 +179,7 @@
   --glass-edge: rgba(255, 255, 255, 0.72);
   --glass-text: rgba(0, 0, 0, 0.06);
   --glass-card-fill: rgba(255, 255, 255, 0.34);
+  --glass-card-base: rgba(255, 255, 255, 0.42);
   --glass-card-edge: rgba(255, 255, 255, 0.48);
   --orb-a: #9ecbff;
   --orb-b: #f5d0c5;
@@ -381,8 +385,8 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .year-chip {
-  height: 32px;
-  min-width: 44px;
+  height: 44px;
+  min-width: 48px;
   padding: 0 12px;
   border-radius: 980px;
   border: 1px solid var(--separator);
@@ -437,14 +441,11 @@ input[type='number']::-webkit-inner-spin-button {
 
 .hero-projected {
   margin-top: 4px;
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 650;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  background: linear-gradient(90deg, #ffd60a 0%, #ff9f0a 42%, #ff375f 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--secondary);
 }
 
 .year-row {
@@ -503,9 +504,13 @@ input[type='number']::-webkit-inner-spin-button {
 
 .origin-topbar h1 {
   margin: 0;
+  min-width: 0;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .origin-sub {
@@ -618,7 +623,9 @@ input[type='number']::-webkit-inner-spin-button {
 
 .panel,
 .liquid-glass-card {
-  background: var(--glass-card-fill);
+  background:
+    linear-gradient(var(--glass-card-base), var(--glass-card-base)),
+    var(--glass-card-fill);
   backdrop-filter: saturate(180%) blur(40px);
   -webkit-backdrop-filter: saturate(180%) blur(40px);
   border: 0.5px solid var(--glass-card-edge);
@@ -696,6 +703,30 @@ input[type='number']::-webkit-inner-spin-button {
 
 .compare-grid {
   min-width: 740px;
+}
+
+/* Keep the horizontal scroll inside the table's own card. Without min-width:0
+   the grid track stretches to the content and the page itself pans. */
+.compare-scroll {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.compare-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--tertiary);
+}
+
+@media (min-width: 900px) {
+  .compare-hint {
+    display: none;
+  }
 }
 
 .compare-row {
