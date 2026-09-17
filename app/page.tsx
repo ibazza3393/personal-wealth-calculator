@@ -126,7 +126,7 @@ export default function OverviewPage() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <section className="panel rise rise-2 rounded-[20px] px-5 py-5">
+        <section className="panel rise rise-2 rounded-[26px] px-5 py-5">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-[17px] font-semibold">Markets</h2>
             <span className="text-[12px] text-[var(--tertiary)]">
@@ -152,7 +152,7 @@ export default function OverviewPage() {
           </div>
         </section>
 
-        <section className="panel rise rise-2 rounded-[20px] px-5 py-5">
+        <section className="panel rise rise-2 rounded-[26px] px-5 py-5">
           <h2 className="text-[17px] font-semibold">Tax · {taxRegion}</h2>
           <p className="mt-1 text-[12px] text-[var(--tertiary)]">
             Resident rates, illustrative. Switch AU/NZ in the bar.
@@ -193,7 +193,7 @@ export default function OverviewPage() {
           </div>
         </section>
 
-        <section className="panel rise rise-3 rounded-[20px] px-5 py-5">
+        <section className="panel rise rise-3 rounded-[26px] px-5 py-5">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="text-[17px] font-semibold">Allocation</h2>
             <span className="text-[13px] tabular-nums text-[var(--secondary)]">{figure(assetCents)}</span>
@@ -210,7 +210,7 @@ export default function OverviewPage() {
           )}
         </section>
 
-        <section className="panel rise rise-3 rounded-[20px] px-5 py-5">
+        <section className="panel rise rise-3 rounded-[26px] px-5 py-5">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-[17px] font-semibold">This month</h2>
             <Link href="/spend" className="text-[13px] text-[var(--blue)]">
