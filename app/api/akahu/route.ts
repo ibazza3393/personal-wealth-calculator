@@ -1,15 +1,31 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { appCredentials } from '@/lib/providers/akahu-oauth';
+
 export const dynamic = 'force-dynamic';
 
-function tokens() {
-  const appToken = process.env.AKAHU_APP_TOKEN?.trim() ?? '';
-  const userToken = process.env.AKAHU_USER_TOKEN?.trim() ?? '';
-  return { appToken, userToken, configured: Boolean(appToken && userToken) };
-}
-
+/**
+ * Whether this user has a bank connected, and whether the host can offer one
+ * at all. Reports a boolean only — the token itself never leaves the server.
+ */
 export async function GET() {
-  const { configured } = tokens();
-  // Status only. The sync itself lives at /api/akahu/sync, gated by the
-  // Supabase session rather than by a secret the browser cannot send.
-  return NextResponse.json({ configured, ready: configured });
+  const configured = Boolean(appCredentials());
+
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) {
+    return NextResponse.json({ configured, connected: false });
+  }
+
+  const admin = createAdminClient();
+  if (!admin) return NextResponse.json({ configured: false, connected: false });
+
+  const { data } = await admin
+    .from('akahu_tokens')
+    .select('user_id')
+    .eq('user_id', auth.user.id)
+    .maybeSingle();
+
+  return NextResponse.json({ configured, connected: Boolean(data) });
 }
