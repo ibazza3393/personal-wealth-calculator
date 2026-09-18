@@ -3585,3 +3585,215 @@ input[type='number']::-webkit-inner-spin-button {
   font-size: 15px;
   color: var(--tertiary);
 }
+
+/* ==========================================================================
+   Sign in / sign up.
+
+   One card on the drifting background the onboarding uses, so arriving here
+   from the landing page feels like the same product. Inputs are opaque rather
+   than glass: legibility beats the effect under a form, and a password field
+   you cannot read is worse than no effect at all.
+   ========================================================================== */
+
+.auth-stage {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+.auth-card {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px;
+  border-radius: 26px;
+  text-align: center;
+}
+
+.auth-mark {
+  align-self: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--glass-text-primary);
+}
+
+.auth-heading {
+  font-size: clamp(24px, 6vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--glass-text-primary);
+}
+
+.auth-sub {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--glass-text-secondary);
+}
+
+.auth-provider {
+  margin-top: 22px;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 16px;
+  font-weight: 560;
+  color: var(--glass-text-primary);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.auth-provider:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.auth-provider:disabled,
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 4px;
+  color: var(--glass-text-secondary);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field > span {
+  font-size: 13px;
+  color: var(--glass-text-secondary);
+  padding-left: 2px;
+}
+
+/* 16px minimum: below it iOS Safari zooms the page when the field focuses. */
+.auth-field input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #0c2237;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.auth-field input::placeholder {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.auth-field input:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.13);
+}
+
+.auth-password {
+  position: relative;
+  display: block;
+}
+
+.auth-password input {
+  padding-right: 68px;
+}
+
+.auth-reveal {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  color: var(--glass-text-secondary);
+  cursor: pointer;
+}
+
+.auth-reveal:hover {
+  color: var(--glass-text-primary);
+}
+
+.auth-error {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #ffb4ab;
+}
+
+.auth-submit {
+  min-height: 54px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #071a2b;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+}
+
+.auth-alt {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--glass-text-secondary);
+}
+
+.auth-alt-link {
+  color: var(--glass-text-primary);
+  font-weight: 560;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-provider,
+  .auth-field input {
+    transition: none;
+  }
+}

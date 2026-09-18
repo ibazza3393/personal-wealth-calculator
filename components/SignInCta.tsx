@@ -9,17 +9,25 @@ type Props = {
   variant?: 'primary' | 'secondary';
   /** Label before we know whether a session exists. */
   label?: string;
+  /** Where a signed-out visitor goes. Signed-in always goes to the dashboard. */
+  href?: string;
   className?: string;
 };
 
 /**
- * Sends people to the dashboard after Google sign-in. Someone who already has a
- * session gets a plain link instead of a second round trip through the provider.
+ * Sends people into the app. Google is no longer the only way in, so this now
+ * links to the auth page that offers both it and email rather than launching
+ * one provider directly. Someone who already has a session skips straight to
+ * the dashboard instead of being asked to sign in again.
  */
-export function SignInCta({ variant = 'primary', label = 'Sign in with Google', className }: Props) {
+export function SignInCta({
+  variant = 'primary',
+  label = 'Get started',
+  href = '/signup',
+  className,
+}: Props) {
   const configured = isSupabaseConfigured();
   const [signedIn, setSignedIn] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!configured) return;
@@ -42,28 +50,9 @@ export function SignInCta({ variant = 'primary', label = 'Sign in with Google', 
 
   const cls = `cta cta-${variant}${className ? ` ${className}` : ''}`;
 
-  // No Supabase on this host, or already signed in: straight through to the app.
-  if (!configured || signedIn) {
-    return (
-      <Link href="/dashboard" className={cls}>
-        {signedIn ? 'Open dashboard' : label}
-      </Link>
-    );
-  }
-
-  async function signIn() {
-    setBusy(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
-    });
-    if (error) setBusy(false);
-  }
-
   return (
-    <button type="button" className={cls} disabled={busy} onClick={() => void signIn()}>
-      {busy ? 'Opening Google…' : label}
-    </button>
+    <Link href={signedIn ? '/dashboard' : href} className={cls}>
+      {signedIn ? 'Open dashboard' : label}
+    </Link>
   );
 }

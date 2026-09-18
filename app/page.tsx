@@ -105,8 +105,8 @@ export default async function LandingPage() {
             <a href="#privacy">Privacy</a>
           </nav>
           <div className="lx-nav-actions">
-            <Link href="/dashboard" className="lx-quiet">
-              Open app
+            <Link href="/signin" className="lx-quiet">
+              Sign in
             </Link>
             <SignInCta variant="primary" label="Get started" />
           </div>
@@ -134,8 +134,8 @@ export default async function LandingPage() {
             </p>
             <div className="lx-hero-cta">
               <SignInCta variant="primary" label="Get started" />
-              <Link href="/dashboard" className="cta cta-ghost">
-                Explore without an account
+              <Link href="/signin" className="cta cta-ghost">
+                I already have an account
               </Link>
             </div>
           </div>
@@ -353,8 +353,8 @@ export default async function LandingPage() {
             </p>
             <div className="lx-hero-cta lx-center">
               <SignInCta variant="primary" label="Get started" />
-              <Link href="/dashboard" className="cta cta-ghost">
-                Explore without an account
+              <Link href="/signin" className="cta cta-ghost">
+                I already have an account
               </Link>
             </div>
           </div>
