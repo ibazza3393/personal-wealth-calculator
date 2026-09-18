@@ -2355,3 +2355,348 @@ input[type='number']::-webkit-inner-spin-button {
     display: none;
   }
 }
+
+/* ==========================================================================
+   Section hero — the portal's empty state.
+   Blurred colour field per section, serif-italic lead word, one opaque CTA,
+   and a single glass preview card. Glass stops at the preview; the rest of
+   the page stays flat and opaque.
+   ========================================================================== */
+
+.sh {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 64px 20px 48px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sh-field {
+  position: absolute;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.sh-wash {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.75;
+  will-change: transform;
+}
+
+.sh-wash-a {
+  width: 70%;
+  height: 80%;
+  top: -6%;
+  left: -10%;
+  animation: sh-drift-a 38s ease-in-out infinite;
+}
+
+.sh-wash-b {
+  width: 60%;
+  height: 70%;
+  bottom: -10%;
+  right: -8%;
+  animation: sh-drift-b 46s ease-in-out infinite;
+}
+
+@keyframes sh-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(7%, 5%, 0) scale(1.14);
+  }
+}
+
+@keyframes sh-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+/* Colour fields. Each section gets its own so the portal reads as a set. */
+.sh-ocean {
+  background: linear-gradient(165deg, #0d4a6b 0%, #0a3550 55%, #072435 100%);
+}
+.sh-ocean .sh-wash-a {
+  background: #2f8fc4;
+}
+.sh-ocean .sh-wash-b {
+  background: #1d9a9a;
+}
+
+.sh-meadow {
+  background: linear-gradient(165deg, #2e4a16 0%, #1d3310 55%, #121f0a 100%);
+}
+.sh-meadow .sh-wash-a {
+  background: #8fae2b;
+}
+.sh-meadow .sh-wash-b {
+  background: #d8c63a;
+}
+
+.sh-dusk {
+  background: linear-gradient(165deg, #2c2352 0%, #1d1836 55%, #120f22 100%);
+}
+.sh-dusk .sh-wash-a {
+  background: #6f5cd6;
+}
+.sh-dusk .sh-wash-b {
+  background: #b25ec4;
+}
+
+.sh-ember {
+  background: linear-gradient(165deg, #5a2a12 0%, #3d1c0d 55%, #241008 100%);
+}
+.sh-ember .sh-wash-a {
+  background: #d9702a;
+}
+.sh-ember .sh-wash-b {
+  background: #c4483a;
+}
+
+.sh-inner {
+  position: relative;
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.sh-h {
+  font-family: var(--font-display, inherit);
+  font-size: clamp(28px, 5.2vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+  font-weight: 620;
+  text-wrap: balance;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.42);
+}
+
+.sh-h em {
+  font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.sh-sub {
+  margin: 14px auto 0;
+  max-width: 42ch;
+  font-size: var(--text-callout);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+  text-wrap: pretty;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.36);
+}
+
+/* The one fully opaque element in the scene. */
+.sh-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 26px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #10233b;
+  font-size: var(--text-callout);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease;
+}
+
+.sh-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+}
+
+.sh-preview {
+  margin-top: 36px;
+  padding: 20px;
+  text-align: left;
+}
+
+.sh-note {
+  margin: 26px auto 0;
+  max-width: 40ch;
+  font-size: var(--text-footnote);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* --- Preview building blocks -------------------------------------------- */
+
+.sh-preview-label {
+  font-size: var(--text-caption-1);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sh-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sh-tile {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sh-stat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.sh-stat-label {
+  flex: 1 0 100%;
+  font-size: var(--text-caption-1);
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.sh-stat-value {
+  font-size: var(--text-callout);
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sh-stat-delta {
+  font-size: var(--text-caption-1);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sh-stat-delta.is-up {
+  color: #6ee7a8;
+}
+
+.sh-stat-delta.is-down {
+  color: #ff9a8c;
+}
+
+.sh-spark {
+  display: block;
+  width: 100%;
+  height: 32px;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+
+/* Credit-score style meter. */
+.sh-meter {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.sh-meter span {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.sh-meter span.is-on {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.sh-meter-caption {
+  margin-top: 8px;
+  font-size: var(--text-caption-1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (min-width: 560px) {
+  .sh {
+    padding: 80px 32px 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-wash,
+  .sh-cta {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .sh-wash {
+    display: none;
+  }
+}
+
+/* Grouped sidebar navigation. */
+.origin-nav-group + .origin-nav-group {
+  margin-top: 18px;
+}
+
+.origin-nav-label {
+  padding: 0 12px 6px;
+  font-size: var(--text-caption-2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tertiary);
+}
+
+.origin-shell.is-collapsed .origin-nav-label {
+  display: none;
+}
+
+/* Market preview tiles: name + value, then ticker + change. */
+.sh-tile-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sh-tile-name {
+  font-size: var(--text-subheadline);
+  font-weight: 560;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sh-tile-value {
+  font-size: var(--text-subheadline);
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sh-tile-sub {
+  margin-top: 3px;
+  font-size: var(--text-caption-1);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sh-tile-sub .is-up {
+  color: #6ee7a8;
+}
+
+.sh-tile-sub .is-down {
+  color: #ff9a8c;
+}

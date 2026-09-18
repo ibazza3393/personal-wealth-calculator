@@ -10,7 +10,8 @@ import type {
   NetWorthSnapshot,
   Property,
 } from './domain';
-import { EMPTY_LEDGER, FX_AS_OF, FX_NZD_AUD } from './domain';
+import { EMPTY_LEDGER } from './domain';
+import { convert, FALLBACK_FX, type FxTable } from './fx';
 
 const MAX_ITEMS = 50;
 const MAX_NAME = 80;
@@ -27,19 +28,19 @@ function oneOf<T extends string>(v: unknown, allowed: readonly T[], fallback: T)
   return typeof v === 'string' && (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
 }
 
-export function toNzd(amount: number, currency: MoneyCurrency, fx = FX_NZD_AUD): number {
-  if (currency === 'NZD') return amount;
-  if (currency === 'AUD') return fx > 0 ? amount / fx : 0;
-  return amount / fx;
+/**
+ * USD used to fall through to the AUD branch, so US$100 was converted at the
+ * NZD/AUD rate. Every currency now goes through its own rate.
+ */
+export function toNzd(amount: number, currency: MoneyCurrency, fx: FxTable = FALLBACK_FX): number {
+  return convert(amount, currency, 'NZD', fx) ?? 0;
 }
 
-export function toAud(amount: number, currency: MoneyCurrency, fx = FX_NZD_AUD): number {
-  if (currency === 'AUD') return amount;
-  if (currency === 'NZD') return amount * fx;
-  return amount * fx;
+export function toAud(amount: number, currency: MoneyCurrency, fx: FxTable = FALLBACK_FX): number {
+  return convert(amount, currency, 'AUD', fx) ?? 0;
 }
 
-export function buildSnapshot(doc: LedgerDocument, fx = FX_NZD_AUD, asOf = FX_AS_OF): NetWorthSnapshot {
+export function buildSnapshot(doc: LedgerDocument, fx: FxTable = FALLBACK_FX): NetWorthSnapshot {
   const nzd = (amount: number, currency: MoneyCurrency) => toNzd(amount, currency, fx);
 
   let cash = 0;
@@ -76,7 +77,7 @@ export function buildSnapshot(doc: LedgerDocument, fx = FX_NZD_AUD, asOf = FX_AS
   const netNzd = assets - liabilities;
 
   return {
-    as_of: asOf,
+    as_of: fx.asOf,
     cash,
     investments,
     super: superBal,
@@ -86,8 +87,8 @@ export function buildSnapshot(doc: LedgerDocument, fx = FX_NZD_AUD, asOf = FX_AS
     mortgages,
     other_liabilities: otherLiabilities,
     net_worth_nzd: netNzd,
-    net_worth_aud: netNzd * fx,
-    fx_rate_nzd_aud: fx,
+    net_worth_aud: toAud(netNzd, 'NZD', fx),
+    fx_rate_nzd_aud: fx.rates.AUD ?? 0,
   };
 }
 

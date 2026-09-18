@@ -2,6 +2,7 @@
 
 import { Hairline, Row } from '@/components/HoldingsGroup';
 import { CurrencyInput } from '@/components/CurrencyInput';
+import { SectionHero, SheetStat } from '@/components/SectionHero';
 import { useWealth } from '@/components/WealthProvider';
 import { budgetTotals } from '@/lib/budget';
 import { centsToDollars, formatCents, toCents } from '@/lib/money';
@@ -44,6 +45,38 @@ export default function SpendPage() {
     }));
 
   const spentPct = totals.income > 0 ? Math.min(100, Math.round((totals.spent / totals.income) * 100)) : 0;
+
+  if (isHydrated && !budget.monthlyIncome && budget.items.length === 0) {
+    return (
+      <main className="pt-4">
+        <SectionHero
+          tone="dusk"
+          lead="Watch"
+          headline="where it goes"
+          sub="Set your take-home pay against what you actually spend, and your savings rate stops being a guess."
+          ctaLabel="Load a sample month"
+          onCta={loadDemo}
+          note="Nothing is sent anywhere. Categories live in this browser alongside your holdings."
+        >
+          <p className="sh-preview-label">A month at a glance</p>
+          <div className="sh-grid">
+            <div className="sh-tile">
+              <SheetStat label="Income" value="$8,500" />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Spent" value="$3,545" />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Left over" value="$4,955" delta="58%" positive />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Biggest line" value="Rent" delta="$2,200" />
+            </div>
+          </div>
+        </SectionHero>
+      </main>
+    );
+  }
 
   return (
     <main className="pt-4">

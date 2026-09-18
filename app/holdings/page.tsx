@@ -1,6 +1,7 @@
 'use client';
 
 import { EditableRow, Hairline, HoldingsGroup, Row } from '@/components/HoldingsGroup';
+import { SectionHero, SheetStat } from '@/components/SectionHero';
 import { useWealth } from '@/components/WealthProvider';
 import { centsToDollars, formatCents, toCents } from '@/lib/money';
 import { MAX_ITEMS } from '@/lib/sanitize';
@@ -13,9 +14,15 @@ export default function HoldingsPage() {
   // A holding priced off a ticker is worth nothing we can show until its quote
   // lands. Rendering $0 would read as "this is empty" rather than "not priced
   // yet", so those rows show an em dash instead.
-  const pricedSymbols = new Set(quotes.map((q) => q.symbol.toUpperCase()));
+  // A quote in another currency cannot value the holding either, so it counts
+  // as not yet priced rather than being multiplied through at the wrong rate.
+  const usableSymbols = new Set(
+    quotes
+      .filter((q) => q.currency === undefined || q.currency === currency)
+      .map((q) => q.symbol.toUpperCase()),
+  );
   const awaitingPrice = (item: Holding) =>
-    Boolean(item.symbol && (item.units ?? 0) > 0 && !pricedSymbols.has(item.symbol.toUpperCase()));
+    Boolean(item.symbol && (item.units ?? 0) > 0 && !usableSymbols.has(item.symbol.toUpperCase()));
 
   const addHolding = (kind: HoldingKind, name: string, symbol?: string) =>
     patch((prev) => {
@@ -43,6 +50,51 @@ export default function HoldingsPage() {
       ],
       compare: DEFAULT_COMPARE,
     }));
+
+  const isEmpty =
+    !liquidCash && !propertyValue && holdings.length === 0 && liabilities.length === 0;
+
+  if (isHydrated && isEmpty) {
+    return (
+      <main className="pt-4">
+        <SectionHero
+          tone="ocean"
+          lead="Track"
+          headline="your net worth"
+          sub="Unite your financial life to see how your assets and liabilities change over time."
+          ctaLabel="Add your first figure"
+          onCta={loadDemo}
+          note="Everything you enter stays in this browser. Bank connections come later, read-only."
+        >
+          <p className="sh-preview-label">What you&rsquo;ll see</p>
+          <div className="sh-grid">
+            <div className="sh-tile">
+              <SheetStat label="Assets" value="$1.70m" />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Debts" value="−$412k" />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Net worth" value="$1.28m" delta="4.8%" positive />
+            </div>
+            <div className="sh-tile">
+              <SheetStat label="Savings rate" value="31%" />
+            </div>
+          </div>
+        </SectionHero>
+        <p className="mt-6 text-center text-[13px] text-[var(--tertiary)]">
+          Prefer to start from scratch?{' '}
+          <button
+            type="button"
+            className="hit px-1 text-[var(--blue)] underline underline-offset-2"
+            onClick={() => patch((prev) => ({ ...prev, liquidCash: 0 }))}
+          >
+            Enter figures manually
+          </button>
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="pt-4">
