@@ -260,16 +260,15 @@ export default function OverviewPage() {
             <h2 className="text-[17px] font-semibold">Allocation</h2>
             <span className="text-[13px] tabular-nums text-[var(--secondary)]">{figure(assetCents)}</span>
           </div>
-          {allocGroups.length === 0 ? (
-            <p className="text-[15px] text-[var(--tertiary)]">Add holdings to see the mix.</p>
-          ) : (
-            <AllocationRing
-              hydrated
-              totalCents={assetCents}
-              format={(c) => formatCents(c, currency, 0)}
-              groups={allocGroups}
-            />
-          )}
+          {/* The ring stays on screen with nothing in it rather than vanishing:
+              an empty dashboard that drops a whole section reads as broken. */}
+          <AllocationRing
+            hydrated
+            totalCents={assetCents}
+            format={(c) => formatCents(c, currency, 0)}
+            groups={allocGroups}
+            emptyHint="Add cash, holdings or a property and the mix appears here."
+          />
         </section>
 
         <section className="panel liquid-glass-card rise rise-3 rounded-[26px] px-5 py-5">

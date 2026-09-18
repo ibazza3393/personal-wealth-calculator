@@ -15,6 +15,10 @@ const REGIONS = [
 
 const STEPS = ['Start', 'You', 'Own', 'Owe', 'Keep', 'Done'] as const;
 const LAST = STEPS.length - 1;
+/** The numbered questions, which is what the "Step n of 4" kicker counts.
+ *  Start and Done bracket them and are not steps you fill in, so the bar
+ *  tracks the same four rather than showing six ticks against a label of 4. */
+const QUESTIONS = 4;
 
 function markOnboarded() {
   try {
@@ -333,13 +337,13 @@ export default function WelcomePage() {
       <div
         className="obx-progress"
         role="progressbar"
-        aria-valuemin={1}
-        aria-valuemax={STEPS.length}
-        aria-valuenow={step + 1}
+        aria-valuemin={0}
+        aria-valuemax={QUESTIONS}
+        aria-valuenow={Math.max(0, Math.min(QUESTIONS, step))}
         aria-label="Setup progress"
       >
-        {STEPS.map((s, i) => (
-          <span key={s} className={`obx-tick${i <= step ? ' is-on' : ''}`} />
+        {Array.from({ length: QUESTIONS }, (_, i) => (
+          <span key={i} className={`obx-tick${step > i ? ' is-on' : ''}`} />
         ))}
       </div>
 

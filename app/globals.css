@@ -703,7 +703,7 @@ input[type='number']::-webkit-inner-spin-button {
 .wealth-card {
   container-type: inline-size;
   position: relative;
-  aspect-ratio: 1.7;
+  min-height: 188px;
   width: 100%;
   overflow: hidden;
   border-radius: var(--radius-chrome, 20px);
@@ -2233,13 +2233,15 @@ input[type='number']::-webkit-inner-spin-button {
 
 .obx-select {
   width: 100%;
-  min-height: 52px;
+  min-height: 60px;
   margin-top: 6px;
-  padding: 0 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: #0c2237;
-  font-size: var(--text-callout);
+  /* 16px minimum: below it iOS Safari zooms the page when the field focuses. */
+  font-size: 17px;
+  font-weight: 560;
   color: #fff;
 }
 
@@ -2342,16 +2344,24 @@ input[type='number']::-webkit-inner-spin-button {
   margin: 0 auto;
 }
 
-.obx-back {
-  min-height: 48px;
-  padding: 0 18px;
+/* Back and Continue are one pair, so they share a height, a type scale and a
+   minimum width. Only weight and fill separate them. */
+.obx-back,
+.obx-cta {
+  min-height: 54px;
+  min-width: 132px;
+  padding: 0 26px;
   border-radius: 999px;
+  font-size: var(--text-callout);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+}
+
+.obx-back {
   border: 1px solid var(--glass-border);
   background: transparent;
-  font-size: var(--text-subheadline);
   font-weight: 560;
   color: var(--glass-text-secondary);
-  cursor: pointer;
   transition: color 0.16s ease, border-color 0.16s ease;
 }
 
@@ -2362,16 +2372,10 @@ input[type='number']::-webkit-inner-spin-button {
 
 /* The only fully opaque, high-contrast object on the screen. */
 .obx-cta {
-  min-height: 52px;
-  padding: 0 28px;
   border: 0;
-  border-radius: 999px;
   background: #fff;
   color: #071a2b;
-  font-size: var(--text-callout);
   font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease;
 }
@@ -3295,9 +3299,8 @@ input[type='number']::-webkit-inner-spin-button {
 .wealth-card-inner {
   position: relative;
   display: grid;
-  height: 100%;
   grid-template-rows: auto 1fr auto;
-  gap: 8px;
+  gap: 14px;
 }
 
 .wealth-card-top {
@@ -3324,8 +3327,8 @@ input[type='number']::-webkit-inner-spin-button {
 
 .wealth-card-split {
   display: flex;
-  gap: clamp(16px, 6cqw, 28px);
-  padding-top: 8px;
+  gap: clamp(20px, 8cqw, 36px);
+  padding-top: 12px;
   border-top: 1px solid var(--separator);
 }
 
@@ -3574,4 +3577,11 @@ input[type='number']::-webkit-inner-spin-button {
 
 .price-note.is-live {
   color: var(--green, #30d158);
+}
+
+.alloc-empty {
+  max-width: 34ch;
+  text-align: center;
+  font-size: 15px;
+  color: var(--tertiary);
 }

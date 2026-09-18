@@ -18,6 +18,8 @@ type Props = {
   totalCents: number;
   format: (cents: number) => string;
   hydrated: boolean;
+  /** Shown inside the empty ring when nothing has been recorded yet. */
+  emptyHint?: string;
 };
 
 const SIZE = 240;
@@ -44,7 +46,7 @@ function arcPath(a0: number, a1: number) {
  * change in the data never repaints them, and the palette is validated for
  * both modes and for colour-vision deficiency (see globals.css).
  */
-export function AllocationRing({ groups, totalCents, format, hydrated }: Props) {
+export function AllocationRing({ groups, totalCents, format, hydrated, emptyHint }: Props) {
   const titleId = useId();
   const [active, setActive] = useState<string | null>(null);
   const live = groups.filter((g) => g.cents > 0);
@@ -106,8 +108,10 @@ export function AllocationRing({ groups, totalCents, format, hydrated }: Props) 
         </div>
       </div>
 
+      {live.length === 0 && emptyHint && <p className="alloc-empty">{emptyHint}</p>}
+
       <ul className="alloc-legend">
-        {(live.length ? live : groups).map((g) => (
+        {live.map((g) => (
           <li key={g.key}>
             <button
               type="button"
