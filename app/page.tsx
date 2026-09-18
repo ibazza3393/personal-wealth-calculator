@@ -1,16 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import {
-  ArrowLeftRight,
-  ChartLine,
-  CreditCard,
-  EyeOff,
-  KeyRound,
-  Layers,
-  Receipt,
-  ShieldCheck,
-  Wallet,
-} from 'lucide-react';
+import Image from 'next/image';
+import { EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 import { SignInCta } from '@/components/SignInCta';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
@@ -20,45 +11,6 @@ export const metadata = {
   description:
     'A private net worth dashboard for New Zealand and Australia. Read-only bank access, never passwords. Your holdings stay in your browser.',
 };
-
-const TRACK_CARDS = [
-  {
-    icon: Wallet,
-    title: 'Know your number',
-    body: 'Cash, KiwiSaver, super, shares, crypto, property and debt in one net worth.',
-    tone: 'blue' as const,
-  },
-  {
-    icon: Layers,
-    title: 'See the mix',
-    body: 'Allocation across every asset class, and how far it has drifted.',
-    tone: 'violet' as const,
-  },
-  {
-    icon: CreditCard,
-    title: 'Watch the outflow',
-    body: 'Monthly cashflow by category, with a savings rate that feeds the plan.',
-    tone: 'green' as const,
-  },
-  {
-    icon: ChartLine,
-    title: 'Price it live',
-    body: 'Public quotes value your holdings. Prices come in, holdings never go out.',
-    tone: 'amber' as const,
-  },
-  {
-    icon: ArrowLeftRight,
-    title: 'Test the big call',
-    body: 'Buy, rent or index — same capital, same budget, three ending numbers.',
-    tone: 'blue' as const,
-  },
-  {
-    icon: Receipt,
-    title: 'Both tax systems',
-    body: 'Resident rates for New Zealand and Australia behind every projection.',
-    tone: 'violet' as const,
-  },
-];
 
 const PRIVACY = [
   {
@@ -124,13 +76,14 @@ export default async function LandingPage() {
 
           <div className="lx-hero-copy">
             <h1 className="lx-h1">
-              Meet your <em>whole</em>
+              You shouldn&rsquo;t have to <em>guess</em>
               <br />
-              financial picture.
+              what you&rsquo;re worth.
             </h1>
             <p className="lx-hero-sub">
-              Every dollar you own and owe, across New Zealand and Australia, in one private number
-              that updates while you sleep.
+              Next Wealth puts every dollar you own and owe &mdash; cash, KiwiSaver, super, shares,
+              crypto, property and debt &mdash; into one private number, and shows you where it goes
+              from here.
             </p>
             <div className="lx-hero-cta">
               <SignInCta variant="primary" label="Get started" />
@@ -213,9 +166,9 @@ export default async function LandingPage() {
         <section className="lx-band">
           <div className="lx-band-inner">
             <h2 className="lx-h2 lx-h2-center">
-              You shouldn&rsquo;t have to <em>guess</em>
+              One number, built from
               <br />
-              what you&rsquo;re worth.
+              <em>your</em> figures.
             </h2>
             <div className="lx-band-facts">
               <div>
@@ -234,24 +187,60 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ---------- Track ---------- */}
+        {/* ---------- Product showcase ---------- */}
         <section className="lx-section" id="track">
           <h2 className="lx-h2 lx-h2-center">
             <em>Track</em> your entire
             <br />
             financial life.
           </h2>
-          <div className="lx-cards">
-            {TRACK_CARDS.map(({ icon: Icon, title, body, tone }) => (
-              <article key={title} className={`lx-card panel liquid-glass-card lx-tone-${tone}`}>
-                <span className="lx-card-icon" aria-hidden>
-                  <Icon size={20} strokeWidth={1.75} />
-                </span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </article>
-            ))}
+          <p className="lx-section-sub">
+            The real app, on the devices you use. Net worth, allocation, cashflow and the
+            thirty-year projection &mdash; all from the figures you enter.
+          </p>
+
+          <div className="lx-showcase">
+            <figure className="lx-ipad">
+              <div className="lx-ipad-screen">
+                <Image
+                  src="/shots/ipad-forecast-wide.png"
+                  alt="Next Wealth forecast on iPad: projected net worth over ten years, with starting net worth, contributions, growth and monthly saving."
+                  width={2732}
+                  height={2048}
+                  sizes="(max-width: 860px) 90vw, 620px"
+                  priority
+                />
+              </div>
+            </figure>
+
+            <figure className="lx-iphone lx-iphone-front">
+              <div className="lx-iphone-screen">
+                <Image
+                  src="/shots/iphone-overview.png"
+                  alt="Next Wealth overview on iPhone: current net worth, ten-year projection, and connected account balances."
+                  width={804}
+                  height={1748}
+                  sizes="(max-width: 860px) 46vw, 230px"
+                />
+              </div>
+            </figure>
+
+            <figure className="lx-iphone lx-iphone-back" aria-hidden>
+              <div className="lx-iphone-screen">
+                <Image
+                  src="/shots/iphone-spend.png"
+                  alt=""
+                  width={804}
+                  height={1748}
+                  sizes="(max-width: 860px) 46vw, 230px"
+                />
+              </div>
+            </figure>
           </div>
+
+          <p className="lx-showcase-caption">
+            Screens from Next Wealth. Figures shown are sample data.
+          </p>
         </section>
 
         {/* ---------- Bento: decide ---------- */}
@@ -376,9 +365,12 @@ export default async function LandingPage() {
             <Link href="/compare">Compare</Link>
             <Link href="/markets">Markets</Link>
             <Link href="/connections">Connections</Link>
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms of Use</Link>
           </nav>
         </div>
         <p className="lx-legal">
+          Next Wealth is built and operated by Barry Iyengar Designs Limited, New Zealand.
           Projections and tax figures are illustrative and are not financial advice. Market data from
           CoinGecko and Yahoo Finance. Bank connections via Akahu (NZ) and CDR (AU).
         </p>
