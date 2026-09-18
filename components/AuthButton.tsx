@@ -1,10 +1,13 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export function AuthButton() {
   const configured = isSupabaseConfigured();
+  const router = useRouter();
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -28,28 +31,28 @@ export function AuthButton() {
 
   if (!configured) return null;
 
-  async function signIn() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-  }
-
   async function signOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    router.replace('/signin');
+    router.refresh();
+  }
+
+  if (!signedIn) {
+    return (
+      <Link href="/signin" className="hit text-[13px] text-[var(--blue)]">
+        Sign in
+      </Link>
+    );
   }
 
   return (
     <button
       type="button"
       className="hit text-[13px] text-[var(--blue)]"
-      onClick={() => void (signedIn ? signOut() : signIn())}
+      onClick={() => void signOut()}
     >
-      {signedIn ? 'Sign out' : 'Sign in'}
+      Sign out
     </button>
   );
 }

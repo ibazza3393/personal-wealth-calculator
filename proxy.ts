@@ -10,7 +10,8 @@ export async function proxy(request: NextRequest) {
     // Local development without Supabase runs open, which is convenient. In
     // production it would mean a missing env var silently publishes every
     // page — so there, no auth config means no access.
-    if (process.env.NODE_ENV === 'production' && request.nextUrl.pathname !== '/') {
+    const open = ['/', '/signin', '/signup'];
+    if (process.env.NODE_ENV === 'production' && !open.includes(request.nextUrl.pathname)) {
       return NextResponse.json({ error: 'Auth is not configured on this host.' }, { status: 503 });
     }
     return response;
@@ -40,14 +41,16 @@ export async function proxy(request: NextRequest) {
   // custom domains — so attaching one would have published every page and API
   // route, including the Akahu sync. The session is the gate now.
   const path = request.nextUrl.pathname;
-  const isPublic = path === '/' || path.startsWith('/auth/');
+  const isPublic =
+    path === '/' || path === '/signin' || path === '/signup' || path.startsWith('/auth/');
 
   if (!user && !isPublic) {
     if (path.startsWith('/api/')) {
       return NextResponse.json({ error: 'Sign in to use this endpoint.' }, { status: 401 });
     }
     const to = request.nextUrl.clone();
-    to.pathname = '/';
+    to.pathname = '/signin';
+    to.search = '';
     return NextResponse.redirect(to);
   }
 
