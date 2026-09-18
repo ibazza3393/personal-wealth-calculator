@@ -7,7 +7,7 @@ import { WealthProvider } from '@/components/WealthProvider';
 export const metadata: Metadata = {
   title: 'Next Wealth',
   description:
-    'Private NZ/AU net worth. Holdings stay in your browser. Banks via Akahu later — never passwords.',
+    'Private NZ/AU net worth. Read-only bank access via Akahu — never passwords.',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,

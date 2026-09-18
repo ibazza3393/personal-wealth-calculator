@@ -19,9 +19,11 @@ Akahu does not charge for a Personal App that reads **your** accounts (1 user, n
 1. Create a profile and connect a bank at [my.akahu.nz](https://my.akahu.nz).
 2. Developers page → Personal App → copy **App ID Token** and **User Access Token**.
 3. Copy `.env.example` to `.env.local` (never commit it).
-4. `npm run dev` → Connections → **Connect NZ bank (Akahu)**.
+4. `npm run dev` → sign in → Connections → **Sync**.
 
-Tokens are used only in `app/api/akahu/route.ts`. Do not put them on the public Vercel project without `WEALTH_PERSONAL_KEY` — that URL would otherwise expose your balances.
+Tokens are read only on the server, in `app/api/akahu/sync/route.ts`, and are never sent to the browser.
+
+The sync is guarded by your Supabase session: `proxy.ts` gates every route except the landing page and the auth callback, so a signed-out request to `/api/akahu/sync` gets a 401 and a signed-out page request is redirected. That replaced an earlier shared-secret header, which the browser had no way to send without shipping the secret to the client — so it refused every real request.
 
 ## What it does
 
