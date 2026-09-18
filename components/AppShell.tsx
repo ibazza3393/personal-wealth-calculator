@@ -21,12 +21,15 @@ const NAV_GROUPS: { label: string; links: NavLink[] }[] = [
       { href: '/holdings', label: 'Holdings', icon: 'chart.bar' },
       { href: '/spend', label: 'Spend', icon: 'creditcard' },
       { href: '/markets', label: 'Markets', icon: 'chart.line.uptrend.xyaxis' },
+      { href: '/equity', label: 'Equity', icon: 'chart.bar' },
     ],
   },
   {
     label: 'Plan',
     links: [
+      { href: '/forecast', label: 'Forecast', icon: 'chart.line.uptrend.xyaxis' },
       { href: '/compare', label: 'Compare', icon: 'arrow.left.arrow.right' },
+      { href: '/credit', label: 'Credit', icon: 'creditcard' },
       { href: '/connections', label: 'Connections', icon: 'link' },
     ],
   },
