@@ -41,7 +41,7 @@ export default function ConnectionsPage() {
     setSyncing(true);
     setNotice('Syncing Akahu…');
     try {
-      const res = await fetch('/api/akahu', { method: 'POST' });
+      const res = await fetch('/api/akahu/sync', { method: 'POST' });
       const json = (await res.json()) as {
         error?: string;
         connections?: Parameters<typeof mergeAkahuLedger>[1]['connections'];
@@ -59,7 +59,7 @@ export default function ConnectionsPage() {
       patch((prev) => mergeAkahuLedger(prev, { connections: json.connections!, accounts: json.accounts! }));
       setNotice(`Synced ${json.count ?? json.accounts.length} NZ accounts. Tokens never left the server.`);
     } catch {
-      setNotice('Could not reach /api/akahu.');
+      setNotice('Could not reach the sync endpoint.');
     } finally {
       setSyncing(false);
     }
