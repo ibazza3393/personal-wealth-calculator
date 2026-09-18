@@ -464,13 +464,14 @@ input[type='number']::-webkit-inner-spin-button {
 
 .origin-side-foot select,
 .origin-top-select {
-  height: 36px;
-  border-radius: 10px;
+  height: 44px;
+  border-radius: 12px;
   border: 1px solid var(--separator);
-  background: color-mix(in srgb, var(--elevated) 70%, transparent);
+  background: color-mix(in srgb, var(--elevated) 80%, transparent);
   color: var(--label);
-  padding: 0 8px;
-  font-size: 13px;
+  padding: 0 12px;
+  font-size: 15px;
+  width: 100%;
 }
 
 .origin-topbar {
@@ -517,42 +518,76 @@ input[type='number']::-webkit-inner-spin-button {
   display: none;
 }
 
-.origin-top-actions {
-  display: flex;
+.origin-menu-btn,
+.origin-avatar-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--separator);
+  background: color-mix(in srgb, var(--elevated) 60%, transparent);
+  color: var(--label);
+  cursor: pointer;
 }
 
+.origin-avatar-btn span {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.origin-avatar-spacer {
+  flex: 0 0 auto;
+  width: 40px;
+}
+
+.origin-topbar {
+  gap: 10px;
+}
+
+/* Four slots, never more: three destinations plus More, which opens the same
+   drawer the hamburger does. Icon over label is the iOS tab-bar shape, and at
+   four items every label fits at 320px without scrolling. */
 .origin-mobile-nav {
   position: fixed;
   left: 12px;
   right: 12px;
   bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 20;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
-  overflow-x: auto;
   padding: 6px;
-  border-radius: 22px;
+  border-radius: 24px;
 }
 
-.origin-mobile-nav a {
-  flex: 1 0 auto;
-  height: 44px;
-  padding: 0 10px;
-  border-radius: 16px;
-  display: inline-flex;
+.origin-mobile-nav a,
+.origin-mobile-nav button {
+  min-height: 50px;
+  padding: 6px 4px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  gap: 3px;
+  background: none;
+  border: 0;
   color: var(--secondary);
+  cursor: pointer;
 }
 
-.origin-mobile-nav .nav-label {
-  display: none;
+.origin-mobile-nav .tab-label {
+  font-size: 11px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
-.origin-mobile-nav a.is-active {
+.origin-mobile-nav a.is-active,
+.origin-mobile-nav button.is-active {
   background: var(--glass-text);
   color: var(--label);
   font-weight: 600;
@@ -603,7 +638,9 @@ input[type='number']::-webkit-inner-spin-button {
     display: none;
   }
 
-  .origin-top-actions {
+  .origin-menu-btn,
+  .origin-avatar-btn,
+  .origin-avatar-spacer {
     display: none;
   }
 
@@ -648,6 +685,7 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .wealth-card {
+  container-type: inline-size;
   transform-style: preserve-3d;
   color: var(--label);
   animation: card-turn 8s ease-in-out infinite;
@@ -2961,15 +2999,281 @@ input[type='number']::-webkit-inner-spin-button {
   color: rgba(255, 255, 255, 0.72);
 }
 
-/* The tab bar carries nine destinations now. Tighten the per-item padding so
-   they all fit at 390px rather than leaving the last one half-cut. */
-@media (max-width: 440px) {
-  .origin-mobile-nav {
-    gap: 0;
-    padding: 6px 4px;
-  }
 
-  .origin-mobile-nav a {
-    padding: 0 6px;
+
+/* ==========================================================================
+   Navigation drawer — the one nav surface below the desktop breakpoint.
+   Opened by the hamburger in the top bar and by More in the tab bar, so
+   there is a single mental model rather than two competing menus.
+   ========================================================================== */
+
+.nd-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.nd-root.is-open {
+  pointer-events: auto;
+}
+
+.nd-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 240ms ease;
+  cursor: default;
+}
+
+.nd-root.is-open .nd-scrim {
+  opacity: 1;
+}
+
+.nd-panel {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(340px, 88vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 0 26px 26px 0;
+  overflow: hidden;
+  transform: translateX(-102%);
+  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.nd-root.is-open .nd-panel {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-panel,
+  .nd-scrim {
+    transition: none;
   }
+}
+
+.nd-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nd-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.nd-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--blue) 24%, transparent);
+  border: 1px solid var(--separator);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nd-who-text {
+  min-width: 0;
+}
+
+.nd-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nd-email {
+  font-size: 12px;
+  color: var(--secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nd-close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--separator);
+  background: none;
+  color: var(--label);
+  cursor: pointer;
+}
+
+/* The list scrolls, not the panel: settings and the sign-out row stay pinned
+   to the bottom edge on a short screen instead of falling below the fold. */
+.nd-nav {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nd-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nd-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tertiary);
+  padding: 0 10px 4px;
+}
+
+.nd-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 14px;
+  font-size: 16px;
+  color: var(--label);
+}
+
+.nd-link.is-active {
+  background: var(--glass-text);
+  font-weight: 600;
+}
+
+.nd-settings {
+  flex: 0 0 auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--separator);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nd-field > span {
+  font-size: 13px;
+  color: var(--secondary);
+  padding-left: 2px;
+}
+
+/* 44px targets and 16px text: below 16px iOS Safari zooms the page on focus,
+   which is what made the old top-bar selects feel broken as well as small. */
+.nd-field select {
+  height: 44px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--separator);
+  background: color-mix(in srgb, var(--elevated) 82%, transparent);
+  color: var(--label);
+  padding: 0 12px;
+  font-size: 16px;
+}
+
+.nd-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 2px;
+}
+
+@media (min-width: 768px) {
+  .nd-root {
+    display: none;
+  }
+}
+
+/* Sidebar settings get the same labelled, full-width treatment. */
+.origin-side-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.origin-side-field > span {
+  font-size: 12px;
+  color: var(--secondary);
+  padding-left: 2px;
+}
+
+.origin-side-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.is-collapsed .origin-side-field,
+.is-collapsed .origin-side-actions {
+  display: none;
+}
+
+/* ==========================================================================
+   Wealth card interior. The amount sits on a baseline with its projection
+   directly beneath, both anchored to the lower edge — a card reads bottom-left
+   to bottom-right, and the figure was previously alone on the floor with its
+   projection pushed out of the clipped box.
+   ========================================================================== */
+
+.wealth-card-inner {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wealth-card-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wealth-card-amount {
+  font-size: clamp(22px, 7cqw, 30px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--label);
+}
+
+.wealth-card-projection {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--secondary);
 }

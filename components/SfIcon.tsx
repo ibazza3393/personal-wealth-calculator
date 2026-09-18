@@ -6,8 +6,12 @@ import {
   CreditCard,
   LayoutGrid,
   Link2,
+  Menu,
+  MoreHorizontal,
   PanelLeft,
   PanelRight,
+  Settings,
+  X,
 } from 'lucide-react';
 
 export type SfName =
@@ -18,7 +22,11 @@ export type SfName =
   | 'arrow.left.arrow.right'
   | 'chart.line.uptrend.xyaxis'
   | 'sidebar.left'
-  | 'sidebar.right';
+  | 'sidebar.right'
+  | 'line.3.horizontal'
+  | 'ellipsis'
+  | 'gearshape'
+  | 'xmark';
 
 const ICONS: Record<SfName, LucideIcon> = {
   'square.grid.2x2': LayoutGrid,
@@ -29,6 +37,10 @@ const ICONS: Record<SfName, LucideIcon> = {
   'chart.line.uptrend.xyaxis': ChartLine,
   'sidebar.left': PanelLeft,
   'sidebar.right': PanelRight,
+  'line.3.horizontal': Menu,
+  ellipsis: MoreHorizontal,
+  gearshape: Settings,
+  xmark: X,
 };
 
 export function SfIcon({ name, className }: { name: SfName; className?: string }) {

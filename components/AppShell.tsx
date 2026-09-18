@@ -2,18 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 import { AuthButton } from '@/components/AuthButton';
-import { SfIcon, type SfName } from '@/components/SfIcon';
+import { NavDrawer, type NavGroup, type NavLink } from '@/components/NavDrawer';
+import { SfIcon } from '@/components/SfIcon';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CURRENCIES, type CurrencyCode } from '@/lib/currency';
 import { SIDEBAR_KEY } from '@/lib/types';
+import { useUser } from '@/lib/useUser';
 import { useWealth } from '@/components/WealthProvider';
 
-type NavLink = { href: string; label: string; icon: SfName };
-
-/** Grouped the way the portal reads: what you track, then what connects it. */
-const NAV_GROUPS: { label: string; links: NavLink[] }[] = [
+/** Grouped the way the portal reads: what you track, then what you plan. */
+const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Track',
     links: [
@@ -37,6 +37,17 @@ const NAV_GROUPS: { label: string; links: NavLink[] }[] = [
 
 const LINKS = NAV_GROUPS.flatMap((g) => g.links);
 
+/**
+ * iOS tab bars top out at five and read best at four: three destinations plus
+ * More. Everything else lives one tap away in the drawer, which is the same
+ * surface the hamburger opens — one nav model, not two.
+ */
+const TABS: NavLink[] = [
+  { href: '/dashboard', label: 'Overview', icon: 'square.grid.2x2' },
+  { href: '/holdings', label: 'Holdings', icon: 'chart.bar' },
+  { href: '/spend', label: 'Spend', icon: 'creditcard' },
+];
+
 const listeners = new Set<() => void>();
 
 function readCollapsed() {
@@ -59,8 +70,12 @@ function pageTitle(path: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data, patch } = useWealth();
+  const user = useUser();
   const title = pageTitle(pathname);
   const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   const toggle = useCallback(() => {
     const next = !readCollapsed();
@@ -90,6 +105,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </>
     );
   }
+
+  // Only the Overview greets by name; every other page states where you are.
+  const heading =
+    pathname === '/dashboard' && user.firstName ? `Welcome, ${user.firstName}` : title;
 
   return (
     <>
@@ -132,78 +151,92 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="origin-side-foot">
-            <select
-              aria-label="Tax region"
-              value={data.taxRegion}
-              onChange={(e) => patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))}
-            >
-              <option value="NZ">New Zealand</option>
-              <option value="AU">Australia</option>
-            </select>
-            <select
-              aria-label="Currency"
-              value={data.currency}
-              onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code}
-                </option>
-              ))}
-            </select>
-            <AuthButton />
-            <ThemeToggle />
+            <label className="origin-side-field nav-label">
+              <span>Tax region</span>
+              <select
+                aria-label="Tax region"
+                value={data.taxRegion}
+                onChange={(e) => patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))}
+              >
+                <option value="NZ">New Zealand</option>
+                <option value="AU">Australia</option>
+              </select>
+            </label>
+            <label className="origin-side-field nav-label">
+              <span>Show amounts in</span>
+              <select
+                aria-label="Currency"
+                value={data.currency}
+                onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="origin-side-actions">
+              <AuthButton />
+              <ThemeToggle />
+            </div>
           </div>
         </aside>
 
         <div className="origin-body">
           <div className="origin-col">
             <header className="origin-topbar glass liquid-glass-chrome">
-              <h1>
-                {title} · Planning
-              </h1>
-              <div className="origin-top-actions">
-                <select
-                  aria-label="Tax region"
-                  className="origin-top-select"
-                  value={data.taxRegion}
-                  onChange={(e) => patch((p) => ({ ...p, taxRegion: e.target.value as 'AU' | 'NZ' }))}
+              <button
+                type="button"
+                className="origin-menu-btn hit"
+                aria-label="Open menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+              >
+                <SfIcon name="line.3.horizontal" />
+              </button>
+              <h1>{heading}</h1>
+              {user.initials ? (
+                <button
+                  type="button"
+                  className="origin-avatar-btn hit"
+                  aria-label="Open menu"
+                  onClick={() => setMenuOpen(true)}
                 >
-                  <option value="NZ">NZ</option>
-                  <option value="AU">AU</option>
-                </select>
-                <select
-                  aria-label="Currency"
-                  className="origin-top-select"
-                  value={data.currency}
-                  onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.code}
-                    </option>
-                  ))}
-                </select>
-                <AuthButton />
-                <ThemeToggle />
-              </div>
+                  <span aria-hidden>{user.initials}</span>
+                </button>
+              ) : (
+                <span className="origin-avatar-spacer" aria-hidden />
+              )}
             </header>
             <div className="origin-content">{children}</div>
           </div>
 
           <nav className="origin-mobile-nav glass liquid-glass-chrome" aria-label="Pages">
-            {LINKS.map((link) => {
+            {TABS.map((link) => {
               const active = pathname === link.href;
               return (
-                <Link key={link.href} href={link.href} className={active ? 'is-active' : ''} title={link.label}>
+                <Link key={link.href} href={link.href} className={active ? 'is-active' : ''}>
                   <SfIcon name={link.icon} />
-                  <span className="nav-label">{link.label}</span>
+                  <span className="tab-label">{link.label}</span>
                 </Link>
               );
             })}
+            <button
+              type="button"
+              className={LINKS.some((l) => l.href === pathname) && !TABS.some((t) => t.href === pathname) ? 'is-active' : ''}
+              aria-label="More pages"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+            >
+              <SfIcon name="ellipsis" />
+              <span className="tab-label">More</span>
+            </button>
           </nav>
         </div>
       </div>
+
+      <NavDrawer open={menuOpen} onClose={closeMenu} groups={NAV_GROUPS} pathname={pathname} />
     </>
   );
 }
