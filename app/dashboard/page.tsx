@@ -14,8 +14,6 @@ import { projectNetCents } from '@/lib/project';
 import { calcIncomeTax } from '@/lib/tax';
 import { EXPENSE_GROUPS, HOLDING_GROUPS, ONBOARDING_KEY, type HoldingKind } from '@/lib/types';
 
-const CASH = '#64d2ff';
-const PROPERTY = '#ffd60a';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -34,26 +32,32 @@ export default function OverviewPage() {
   } = data;
 
   // A first-time visitor with an empty ledger goes through onboarding rather
-  // than meeting a dashboard of zeros. Runs after hydration because the answer
-  // lives in local storage.
-  useEffect(() => {
-    if (!isHydrated) return;
-    let done = true;
-    try {
-      done = window.localStorage.getItem(ONBOARDING_KEY) === 'done';
-    } catch {
-      /* Storage blocked — never trap the user in onboarding. */
-    }
-    const empty =
-      !data.liquidCash &&
-      !data.propertyValue &&
-      data.holdings.length === 0 &&
-      data.liabilities.length === 0 &&
-      !data.budget.monthlyIncome;
-    if (!done && empty) router.replace('/welcome');
-  }, [isHydrated, data, router]);
+  // than meeting a dashboard of zeros. The answer lives in local storage, so it
+  // can only be known after hydration — but it is computed during render, not
+  // after it, so the dashboard never paints a frame before the redirect.
+  const empty =
+    !data.liquidCash &&
+    !data.propertyValue &&
+    data.holdings.length === 0 &&
+    data.liabilities.length === 0 &&
+    !data.budget.monthlyIncome;
 
-  if (!isHydrated) {
+  let onboarded = true;
+  try {
+    onboarded =
+      typeof window === 'undefined' || window.localStorage.getItem(ONBOARDING_KEY) === 'done';
+  } catch {
+    /* Storage blocked — never trap the user in onboarding. */
+  }
+  const needsOnboarding = isHydrated && empty && !onboarded;
+
+  useEffect(() => {
+    if (needsOnboarding) router.replace('/welcome');
+  }, [needsOnboarding, router]);
+
+  // Holding the skeleton through the redirect is what removes the flash of a
+  // fully-rendered dashboard of zeros before onboarding takes over.
+  if (!isHydrated || needsOnboarding) {
     return (
       <main className="pt-4">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -85,15 +89,40 @@ export default function OverviewPage() {
   });
   const tax = calcIncomeTax({ region: taxRegion, income: taxIncome, deductions: taxDeductions });
 
-  const allocation = [
-    { label: 'Cash', cents: liquidCents, color: CASH },
-    ...HOLDING_GROUPS.map((g) => ({ label: g.title, cents: byKind(g.kind), color: g.color })),
-    { label: 'Property', cents: propertyCents, color: PROPERTY },
-  ].filter((s) => s.cents > 0);
+  // Four fixed groups, in a fixed order. Seven classes in one ring produced
+  // slivers a few pixels wide; the per-class detail is kept as sub-rows under
+  // whichever group owns it, where the label carries the identity.
+  const investRows = HOLDING_GROUPS.filter((g) => g.kind !== 'business').map((g) => ({
+    label: g.title,
+    cents: byKind(g.kind),
+  }));
+  const investCents = investRows.reduce((sum, r) => sum + r.cents, 0);
+  const businessCents = byKind('business');
 
-  const percents = labelPercents(allocation.map((s) => s.cents));
-  const widths = widthPercents(allocation.map((s) => s.cents));
-  const segments = allocation.map((s, i) => ({ ...s, percent: percents[i] ?? 0, width: widths[i] ?? 0 }));
+  const grouped = [
+    { key: 'cash', label: 'Cash', cents: liquidCents, rows: [] as { label: string; cents: number }[] },
+    {
+      key: 'invest',
+      label: 'Investments',
+      cents: investCents,
+      rows: investRows.filter((r) => r.cents > 0),
+    },
+    { key: 'property', label: 'Property', cents: propertyCents, rows: [] },
+    {
+      key: 'other',
+      label: 'Other assets',
+      cents: businessCents,
+      rows: businessCents > 0 ? [{ label: 'Business', cents: businessCents }] : [],
+    },
+  ].filter((g) => g.cents > 0);
+
+  const percents = labelPercents(grouped.map((g) => g.cents));
+  const widths = widthPercents(grouped.map((g) => g.cents));
+  const allocGroups = grouped.map((g, i) => ({
+    ...g,
+    percent: percents[i] ?? 0,
+    width: widths[i] ?? 0,
+  }));
   const figure = (cents: number) => formatCents(cents, currency, 0);
   const ticker = quotes.slice(0, 6);
   const topSpend = [...budget.items].sort((a, b) => b.amount - a.amount).slice(0, 3);
@@ -126,6 +155,8 @@ export default function OverviewPage() {
         <WealthCard
           currentCents={netCents}
           projectedCents={projectedCents}
+          assetCents={assetCents}
+          liabilityCents={liabilityCents}
           years={data.compare.years}
           currency={currency}
         />
@@ -229,14 +260,14 @@ export default function OverviewPage() {
             <h2 className="text-[17px] font-semibold">Allocation</h2>
             <span className="text-[13px] tabular-nums text-[var(--secondary)]">{figure(assetCents)}</span>
           </div>
-          {segments.length === 0 ? (
+          {allocGroups.length === 0 ? (
             <p className="text-[15px] text-[var(--tertiary)]">Add holdings to see the mix.</p>
           ) : (
             <AllocationRing
               hydrated
               totalCents={assetCents}
               format={(c) => formatCents(c, currency, 0)}
-              segments={segments}
+              groups={allocGroups}
             />
           )}
         </section>

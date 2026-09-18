@@ -13,12 +13,13 @@ export type NavLink = { href: string; label: string; icon: SfName };
 export type NavGroup = { label: string; links: NavLink[] };
 
 /**
- * The single navigation surface below the desktop breakpoint: every
- * destination plus the settings that used to be crammed into the top bar.
- * Sheet semantics — Escape closes, focus moves in on open, background scroll
- * is locked while it is up.
+ * A bottom sheet, the way iOS presents secondary navigation: it rises from the
+ * edge the thumb is already near, rather than from the far corner a hamburger
+ * would put it in. Carries every destination plus the settings that used to be
+ * crammed into the top bar. Escape or the scrim closes it, focus moves in on
+ * open, and background scroll is locked while it is up.
  */
-export function NavDrawer({
+export function NavSheet({
   open,
   onClose,
   groups,
@@ -49,21 +50,22 @@ export function NavDrawer({
   }, [open, onClose]);
 
   return (
-    <div className={`nd-root${open ? ' is-open' : ''}`} aria-hidden={!open}>
-      <button type="button" className="nd-scrim" aria-label="Close menu" tabIndex={open ? 0 : -1} onClick={onClose} />
+    <div className={`ns-root${open ? ' is-open' : ''}`} aria-hidden={!open}>
+      <button type="button" className="ns-scrim" aria-label="Close menu" tabIndex={open ? 0 : -1} onClick={onClose} />
       <div
-        className="nd-panel glass-md"
+        className="ns-panel glass-md"
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
         ref={panel}
       >
-        <div className="nd-head">
-          <div className="nd-who">
-            {user.initials && <span className="nd-avatar" aria-hidden>{user.initials}</span>}
-            <div className="nd-who-text">
-              <p className="nd-name">{user.name ?? 'Next Wealth'}</p>
-              {user.email && <p className="nd-email">{user.email}</p>}
+        <span className="ns-grabber" aria-hidden />
+        <div className="ns-head">
+          <div className="ns-who">
+            {user.initials && <span className="ns-avatar" aria-hidden>{user.initials}</span>}
+            <div className="ns-who-text">
+              <p className="ns-name">{user.name ?? 'Next Wealth'}</p>
+              {user.email && <p className="ns-email">{user.email}</p>}
             </div>
           </div>
           <button type="button" className="nd-close hit" aria-label="Close menu" onClick={onClose}>
@@ -71,15 +73,15 @@ export function NavDrawer({
           </button>
         </div>
 
-        <nav className="nd-nav" aria-label="All pages">
+        <nav className="ns-nav" aria-label="All pages">
           {groups.map((group) => (
-            <div className="nd-group" key={group.label}>
-              <p className="nd-group-label">{group.label}</p>
+            <div className="ns-group" key={group.label}>
+              <p className="ns-group-label">{group.label}</p>
               {group.links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`nd-link${pathname === link.href ? ' is-active' : ''}`}
+                  className={`ns-link${pathname === link.href ? ' is-active' : ''}`}
                   tabIndex={open ? 0 : -1}
                   onClick={onClose}
                 >
@@ -91,9 +93,9 @@ export function NavDrawer({
           ))}
         </nav>
 
-        <div className="nd-settings">
-          <p className="nd-group-label">Settings</p>
-          <label className="nd-field">
+        <div className="ns-settings">
+          <p className="ns-group-label">Settings</p>
+          <label className="ns-field">
             <span>Tax region</span>
             <select
               value={data.taxRegion}
@@ -104,7 +106,7 @@ export function NavDrawer({
               <option value="AU">Australia</option>
             </select>
           </label>
-          <label className="nd-field">
+          <label className="ns-field">
             <span>Show amounts in</span>
             <select
               value={data.currency}
@@ -118,7 +120,7 @@ export function NavDrawer({
               ))}
             </select>
           </label>
-          <div className="nd-actions">
+          <div className="ns-actions">
             <ThemeToggle />
             <AuthButton />
           </div>
