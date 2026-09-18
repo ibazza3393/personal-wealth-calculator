@@ -2,32 +2,72 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?repository-url=https%3A%2F%2Fgithub.com%2Fibazza3393%2Fpersonal-wealth-calculator)
 
-A local-first NZ/AU net worth dashboard. Figures stay in this browser until you connect Akahu. Google sign-in is identity only — holdings are not uploaded.
+A NZ/AU net worth dashboard. Manual figures stay in this browser; connected bank data is held per-user in Supabase under row-level security, with read-only Akahu access each user grants and can revoke.
 
-## ANZ ledger (single user)
+## ANZ ledger
 
-Canonical tables live in `lib/domain.ts`. Overview shows a dual NZD/AUD snapshot from mock NZ (Akahu) + AU (CDR, consent expiring) + a Grey Lynn property. `/connections` is the pipe UI. Real bank OAuth is stubbed.
+Canonical tables live in `lib/domain.ts`. Overview shows a dual NZD/AUD snapshot from NZ (Akahu) + AU (CDR, still stubbed) + property. `/connections` is the pipe UI. NZ bank OAuth is live; AU CDR is not.
 
 KiwiSaver is **not** on official NZ open banking. This repo will not scrape provider logins. Use CSV/manual, or Akahu if they support your scheme as a classic connection. Sorted.org.nz scrapers only publish **public fund fees/returns**, not your balance.
 
 Hybrid: keep Next on Vercel (quotes API). Native is a Capacitor WebView of that URL — see `native/README.md`. Add to Home Screen works via `manifest.webmanifest`.
 
-## Akahu Personal App (free, you only)
+## Akahu (multi-user, Tier 2)
 
-Akahu does not charge for a Personal App that reads **your** accounts (1 user, no payments, daily refresh).
+Each user grants their own read-only access through Akahu's hosted OAuth flow.
+The app no longer carries a single `AKAHU_USER_TOKEN` in its environment — that
+was the Tier 0 "Personal App" shape, which cannot carry a second user and
+quietly stamped one person's bank data onto whoever was signed in.
 
-1. Create a profile and connect a bank at [my.akahu.nz](https://my.akahu.nz).
-2. Developers page → Personal App → copy **App ID Token** and **User Access Token**.
-3. Copy `.env.example` to `.env.local` (never commit it).
-4. `npm run dev` → sign in → Connections → **Sync**.
+1. Register the app with Akahu and copy the **App Token** and **App Secret**.
+2. Register the redirect URI: `https://<your-host>/api/akahu/callback`.
+3. `openssl rand -base64 32` → `AKAHU_TOKEN_KEY`.
+4. Copy `.env.example` to `.env.local` (never commit it) and fill it in.
+5. Apply the migrations in `supabase/migrations/`.
+6. `npm run dev` → sign in → **Connect** → Akahu → **Connections**.
 
-Tokens are read only on the server, in `app/api/akahu/sync/route.ts`, and are never sent to the browser.
+### How access is held
 
-The sync is guarded by your Supabase session: `proxy.ts` gates every route except the landing page and the auth callback, so a signed-out request to `/api/akahu/sync` gets a 401 and a signed-out page request is redirected. That replaced an earlier shared-secret header, which the browser had no way to send without shipping the secret to the client — so it refused every real request.
+- The **App Secret** and every **user access token** are read only on the
+  server (`lib/akahu/`, marked `server-only` so importing them from a client
+  component is a build error). Neither is ever sent to the browser or bundled
+  into the Capacitor build.
+- User tokens are encrypted at rest with **AES-256-GCM** under
+  `AKAHU_TOKEN_KEY`, which lives in the server environment. A database dump
+  without that key is ciphertext.
+- `akahu_tokens` and `akahu_oauth_state` have **RLS enabled with no policy**,
+  so they are unreachable with the publishable key under any session. Only the
+  secret key reaches them, and only from `lib/akahu/token.ts`.
+- The OAuth `state` is a 256-bit random value held server-side, bound to one
+  user, single-use, and valid for ten minutes.
+
+### Revocation
+
+- **Per connection** — `DELETE /api/akahu/connections/[id]` → Akahu
+  `DELETE /authorisations/{id}`.
+- **Everything** — `DELETE /api/akahu/token` → Akahu `DELETE /token`.
+- **Account deletion** — `DELETE /api/account` revokes at Akahu first, then
+  deletes the user, whose cascade takes all bank data with it.
+- **Revoked elsewhere** (at my.akahu.nz) — handled twice over: the signed
+  `TOKEN DELETE` webhook at `/api/akahu/webhook`, and a `401` from Akahu
+  treated as a dead token (`AkahuRevokedError`). Either marks the token revoked
+  and purges the bank data, and `/connections` then shows a reconnect prompt.
+
+### Retention
+
+`purge_expired_bank_data()` drops transactions past 24 months; schedule it with
+pg_cron. `purge_user_bank_data(uuid)` clears one user's bank data and runs on
+revoke and on account deletion. The privacy notice at `/privacy` is public, as
+Akahu's review requires, and names Akahu as the data source.
+
+Every route except `/`, `/signin`, `/signup`, `/privacy`, `/auth/*` and the
+Akahu webhook is gated by the Supabase session in `proxy.ts`. The webhook is
+public because Akahu posts with no session; it authenticates with an RSA-SHA256
+signature over the raw body, verified before the body is read.
 
 ## What it does
 
-- **Private by design** — calculations and storage run only on the client.
+- **Private by design** — manual figures never leave the browser. Bank data is per-user, row-level-secured, and deleted when you revoke.
 - **Hydration-safe storage** — `useSyncExternalStore` so SSR HTML matches the first client pass; saved figures load after mount without crashing on a bad JSON blob.
 - **Integer-cent math** — assets and liabilities are summed in cents, then formatted. `$0.10 + $0.20` is `$0.30`.
 - **Inputs** — cash, property, stocks, bitcoin, other crypto, bonds, funds, retirement, business, loans.

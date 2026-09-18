@@ -1,33 +1,29 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { AkahuRevokedError, akahuFetch, appCredentials } from '@/lib/akahu/api';
+import { loadToken, markRevoked, touchLastUsed } from '@/lib/akahu/token';
 import { mapAkahuAccounts, type AkahuAccountsResponse } from '@/lib/providers/akahu-map';
 import { mapAkahuTransactions, type AkahuTransactionsResponse } from '@/lib/providers/akahu-tx';
 
 export const dynamic = 'force-dynamic';
 
-const AKAHU = 'https://api.akahu.io/v1';
 /** One year is enough to fill a budget view without pulling a whole history. */
 const LOOKBACK_DAYS = 365;
 /** Akahu pages transactions; cap the walk so one sync cannot run unbounded. */
 const MAX_PAGES = 20;
 
-function akahuHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.AKAHU_USER_TOKEN?.trim() ?? ''}`,
-    'X-Akahu-Id': process.env.AKAHU_APP_TOKEN?.trim() ?? '',
-    Accept: 'application/json',
-  };
-}
-
 /**
- * Pulls accounts and transactions from Akahu and stores them against the
- * signed-in user.
+ * Pulls accounts and transactions from Akahu for the signed-in user.
  *
- * The guard is the Supabase session, not a shared secret. The previous route
- * required an `x-wealth-key` header that the browser had no way to send
- * without shipping the secret to the client — so it answered 403 to every
- * real request. Asking Supabase who the caller is fixes that and is the only
- * guard that still works once other people have accounts.
+ * The token is now the user's own, granted through the hosted OAuth flow and
+ * held encrypted in `akahu_tokens`. It used to be a single AKAHU_USER_TOKEN
+ * read from the server environment — which worked for one person and quietly
+ * stamped that person's bank data onto whoever happened to be signed in.
+ *
+ * A 401 from Akahu means the grant is gone, usually because the user revoked
+ * it at my.akahu.nz. That is recorded rather than retried: the token is marked
+ * revoked and /connections tells them the feed stopped and offers to
+ * reconnect.
  */
 export async function POST() {
   const supabase = await createClient();
@@ -37,20 +33,59 @@ export async function POST() {
     return NextResponse.json({ error: 'Sign in to sync your bank accounts.' }, { status: 401 });
   }
 
-  const appToken = process.env.AKAHU_APP_TOKEN?.trim();
-  const userToken = process.env.AKAHU_USER_TOKEN?.trim();
-  if (!appToken || !userToken) {
+  if (!appCredentials().configured) {
     return NextResponse.json(
       {
         error:
-          'Akahu is not configured on this host. Set AKAHU_APP_TOKEN and AKAHU_USER_TOKEN in the server environment.',
+          'Akahu is not configured on this host. Set AKAHU_APP_TOKEN and AKAHU_APP_SECRET in the server environment.',
       },
       { status: 501 },
     );
   }
 
+  let token: string;
+  try {
+    const stored = await loadToken(user.id);
+    if (!stored) {
+      return NextResponse.json(
+        { error: 'No bank connected. Connect one from /connect.', needsConnect: true },
+        { status: 409 },
+      );
+    }
+    token = stored.token;
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Could not read the stored connection.' },
+      { status: 500 },
+    );
+  }
+
+  try {
+    return await sync(supabase, user.id, token);
+  } catch (error) {
+    if (error instanceof AkahuRevokedError) {
+      await markRevoked(user.id).catch(() => {});
+      return NextResponse.json(
+        {
+          error: 'Your bank connection was revoked. Reconnect to keep syncing.',
+          revoked: true,
+          needsConnect: true,
+        },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Sync failed.' },
+      { status: 500 },
+    );
+  }
+}
+
+type ServerClient = Awaited<ReturnType<typeof createClient>>;
+
+async function sync(supabase: ServerClient, userId: string, token: string) {
   // --- Accounts -----------------------------------------------------------
-  const accountsRes = await fetch(`${AKAHU}/accounts`, { cache: 'no-store', headers: akahuHeaders() });
+  const accountsRes = await akahuFetch('/accounts', token);
   if (!accountsRes.ok) {
     return NextResponse.json(
       { error: `Akahu returned ${accountsRes.status} for accounts.` },
@@ -63,7 +98,7 @@ export async function POST() {
   const { error: connErr } = await supabase.from('bank_connections').upsert(
     mapped.connections.map((c) => ({
       id: c.id,
-      user_id: user.id,
+      user_id: userId,
       provider: c.provider,
       country: c.country,
       institution_name: c.institution_name,
@@ -77,7 +112,7 @@ export async function POST() {
   const { error: accErr } = await supabase.from('bank_accounts').upsert(
     mapped.accounts.map((a) => ({
       id: a.id,
-      user_id: user.id,
+      user_id: userId,
       connection_id: a.connection_id,
       country: a.country,
       type: a.type,
@@ -99,14 +134,16 @@ export async function POST() {
   let pages = 0;
 
   do {
-    const url = new URL(`${AKAHU}/transactions`);
-    url.searchParams.set('start', since);
-    if (cursor) url.searchParams.set('cursor', cursor);
+    const query = new URLSearchParams({ start: since });
+    if (cursor) query.set('cursor', cursor);
 
-    const txRes = await fetch(url, { cache: 'no-store', headers: akahuHeaders() });
+    const txRes = await akahuFetch(`/transactions?${query}`, token);
     if (!txRes.ok) {
       return NextResponse.json(
-        { error: `Akahu returned ${txRes.status} for transactions.`, storedAccounts: mapped.accounts.length },
+        {
+          error: `Akahu returned ${txRes.status} for transactions.`,
+          storedAccounts: mapped.accounts.length,
+        },
         { status: 502 },
       );
     }
@@ -120,7 +157,7 @@ export async function POST() {
       // the write here stays a plain upsert.
       const { error: txErr } = await supabase
         .from('transactions')
-        .upsert(page.transactions.map((t) => ({ ...t, user_id: user.id })), {
+        .upsert(page.transactions.map((t) => ({ ...t, user_id: userId })), {
           onConflict: 'id',
           ignoreDuplicates: false,
         });
@@ -131,6 +168,8 @@ export async function POST() {
     cursor = page.nextCursor;
     pages += 1;
   } while (cursor && pages < MAX_PAGES);
+
+  await touchLastUsed(userId);
 
   return NextResponse.json({
     accounts: mapped.accounts.length,
