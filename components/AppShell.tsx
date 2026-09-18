@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useState, useSyncExternalStore } from 'react';
 import { AuthButton } from '@/components/AuthButton';
-import { NavDrawer, type NavGroup, type NavLink } from '@/components/NavDrawer';
+import { NavSheet, type NavGroup, type NavLink } from '@/components/NavSheet';
 import { SfIcon } from '@/components/SfIcon';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CURRENCIES, type CurrencyCode } from '@/lib/currency';
@@ -39,8 +39,7 @@ const LINKS = NAV_GROUPS.flatMap((g) => g.links);
 
 /**
  * iOS tab bars top out at five and read best at four: three destinations plus
- * More. Everything else lives one tap away in the drawer, which is the same
- * surface the hamburger opens — one nav model, not two.
+ * More, which raises a bottom sheet holding everything else.
  */
 const TABS: NavLink[] = [
   { href: '/dashboard', label: 'Overview', icon: 'square.grid.2x2' },
@@ -186,21 +185,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="origin-body">
           <div className="origin-col">
             <header className="origin-topbar glass liquid-glass-chrome">
-              <button
-                type="button"
-                className="origin-menu-btn hit"
-                aria-label="Open menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen(true)}
-              >
-                <SfIcon name="line.3.horizontal" />
-              </button>
+              <span className="origin-avatar-spacer" aria-hidden />
               <h1>{heading}</h1>
               {user.initials ? (
                 <button
                   type="button"
                   className="origin-avatar-btn hit"
                   aria-label="Open menu"
+                  aria-expanded={menuOpen}
                   onClick={() => setMenuOpen(true)}
                 >
                   <span aria-hidden>{user.initials}</span>
@@ -236,7 +228,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <NavDrawer open={menuOpen} onClose={closeMenu} groups={NAV_GROUPS} pathname={pathname} />
+      <NavSheet open={menuOpen} onClose={closeMenu} groups={NAV_GROUPS} pathname={pathname} />
     </>
   );
 }

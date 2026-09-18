@@ -24,6 +24,19 @@ export default function HoldingsPage() {
   const awaitingPrice = (item: Holding) =>
     Boolean(item.symbol && (item.units ?? 0) > 0 && !usableSymbols.has(item.symbol.toUpperCase()));
 
+  // Says plainly where each figure came from. A row with a ticker and a unit
+  // count is marked to market; a row with a typed amount is exactly that, and
+  // conflating the two is how a dashboard starts lying about what it knows.
+  const priceNote = (item: Holding): { text: string; live: boolean } | null => {
+    const symbol = item.symbol?.toUpperCase();
+    if (!symbol || (item.units ?? 0) <= 0) return { text: 'Manual', live: false };
+    const quote = quotes.find((q) => q.symbol.toUpperCase() === symbol);
+    if (!quote || (quote.currency !== undefined && quote.currency !== currency)) {
+      return { text: 'No price', live: false };
+    }
+    return { text: `Live · ${quote.source === 'coingecko' ? 'CoinGecko' : 'Yahoo'}`, live: true };
+  };
+
   const addHolding = (kind: HoldingKind, name: string, symbol?: string) =>
     patch((prev) => {
       if (prev.holdings.filter((h) => h.kind === kind).length >= MAX_ITEMS) return prev;
@@ -134,6 +147,7 @@ export default function HoldingsPage() {
           liveLabel={(item) =>
             awaitingPrice(item) ? '—' : formatCents(holdingValue(item), currency)
           }
+          priceNote={priceNote}
           onAdd={() => addHolding(group.kind, '', group.kind === 'bitcoin' ? 'BTC' : undefined)}
           onName={(id, name) =>
             patch((p) => ({

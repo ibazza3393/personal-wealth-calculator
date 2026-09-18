@@ -1,82 +1,139 @@
 'use client';
 
-type Segment = {
+import { useId, useState } from 'react';
+
+export type AllocRow = { label: string; cents: number };
+export type AllocGroup = {
+  key: string;
   label: string;
   cents: number;
-  color: string;
   percent: number;
+  /** Ring sweep share, which rounds differently from the label percent. */
   width: number;
+  rows: AllocRow[];
 };
 
 type Props = {
-  segments: Segment[];
+  groups: AllocGroup[];
   totalCents: number;
   format: (cents: number) => string;
   hydrated: boolean;
 };
 
-function polar(cx: number, cy: number, r: number, a: number) {
-  return [cx + r * Math.cos(a), cy + r * Math.sin(a)] as const;
-}
+const SIZE = 240;
+const CX = SIZE / 2;
+const R = 92;
+/** Thick band with round caps, so each arc reads as one solid stroke. */
+const BAND = 26;
+const TAU = Math.PI * 2;
 
-function wedge(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number) {
+function arcPath(a0: number, a1: number) {
   const large = a1 - a0 > Math.PI ? 1 : 0;
-  const [x0, y0] = polar(cx, cy, r1, a0);
-  const [x1, y1] = polar(cx, cy, r1, a1);
-  const [x2, y2] = polar(cx, cy, r0, a1);
-  const [x3, y3] = polar(cx, cy, r0, a0);
-  return `M${x0.toFixed(3)} ${y0.toFixed(3)} A${r1} ${r1} 0 ${large} 1 ${x1.toFixed(3)} ${y1.toFixed(3)} L${x2.toFixed(3)} ${y2.toFixed(3)} A${r0} ${r0} 0 ${large} 0 ${x3.toFixed(3)} ${y3.toFixed(3)} Z`;
+  const x0 = CX + R * Math.cos(a0);
+  const y0 = CX + R * Math.sin(a0);
+  const x1 = CX + R * Math.cos(a1);
+  const y1 = CX + R * Math.sin(a1);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
 }
 
-export function AllocationRing({ segments, totalCents, format, hydrated }: Props) {
-  const size = 220;
-  const cx = size / 2;
-  const rOuter = 96;
-  const rInner = 68;
-  const visible = segments.filter((s) => s.cents > 0);
-  const list = visible.length ? visible : segments;
-  const TAU = Math.PI * 2;
-  const start0 = -Math.PI / 2;
-  const gap = list.length > 1 ? 0.035 : 0;
+/**
+ * Allocation as four fixed groups, never more. Seven asset classes in one ring
+ * produced slivers a few pixels wide that no palette can keep apart — the
+ * detail lives in the list below, where identity comes from the label rather
+ * than from a colour. The four group colours are fixed to the group, so a
+ * change in the data never repaints them, and the palette is validated for
+ * both modes and for colour-vision deficiency (see globals.css).
+ */
+export function AllocationRing({ groups, totalCents, format, hydrated }: Props) {
+  const titleId = useId();
+  const [active, setActive] = useState<string | null>(null);
+  const live = groups.filter((g) => g.cents > 0);
+  const current = live.find((g) => g.key === active) ?? null;
 
-  let cursor = start0;
+  // Round caps eat roughly half a band width at each end, so the gap between
+  // arcs is measured in the same units rather than guessed.
+  const capRad = BAND / 2 / R;
+  let cursor = -Math.PI / 2;
 
   return (
-    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
-      <div className="relative h-[168px] w-[168px] shrink-0 sm:h-[196px] sm:w-[196px]">
-        <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full" aria-hidden>
-          <path
-            d={wedge(cx, cx, rInner, rOuter, 0, TAU - 0.001)}
-            fill="var(--ring-track)"
+    <div className="alloc">
+      <div className="alloc-ring">
+        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="alloc-svg" role="img" aria-labelledby={titleId}>
+          <title id={titleId}>
+            {live.length
+              ? `Allocation: ${live.map((g) => `${g.label} ${g.percent}%`).join(', ')}.`
+              : 'Allocation: nothing recorded yet.'}
+          </title>
+          <circle
+            cx={CX}
+            cy={CX}
+            r={R}
+            fill="none"
+            stroke="var(--ring-track)"
+            strokeWidth={BAND}
           />
           {totalCents > 0 &&
-            list.map((seg) => {
-              const sweep = (seg.width / 100) * TAU;
-              const a0 = cursor + gap / 2;
-              const a1 = cursor + sweep - gap / 2;
+            live.map((g) => {
+              const sweep = (g.width / 100) * TAU;
+              // A slice too thin to survive its own round caps is drawn as a
+              // dot at its midpoint rather than as a backwards arc.
+              const inset = Math.min(capRad, sweep / 2 - 0.004);
+              const a0 = cursor + inset;
+              const a1 = cursor + sweep - inset;
               cursor += sweep;
-              if (a1 <= a0) return null;
-              return <path key={seg.label} d={wedge(cx, cx, rInner, rOuter, a0, a1)} fill={seg.color} />;
+              const dim = active !== null && active !== g.key;
+              return (
+                <path
+                  key={g.key}
+                  d={arcPath(a0, Math.max(a1, a0 + 0.001))}
+                  fill="none"
+                  stroke={`var(--alloc-${g.key})`}
+                  strokeWidth={BAND}
+                  strokeLinecap="round"
+                  className={`alloc-arc${dim ? ' is-dim' : ''}`}
+                  onMouseEnter={() => setActive(g.key)}
+                  onMouseLeave={() => setActive(null)}
+                />
+              );
             })}
         </svg>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[var(--tertiary)]">TOTAL</p>
-          <p className="mt-1 text-[22px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
-            {hydrated ? format(totalCents) : '—'}
+        <div className="alloc-centre" aria-hidden>
+          <p className="alloc-centre-label">{current ? current.label : 'Total'}</p>
+          <p className="alloc-centre-value tabular-nums">
+            {hydrated ? format(current ? current.cents : totalCents) : '—'}
           </p>
+          {current && <p className="alloc-centre-sub tabular-nums">{current.percent}%</p>}
         </div>
       </div>
-      <ul className="min-w-0 w-full flex-1 divide-y divide-[var(--separator)]">
-        {list.map((seg) => (
-          <li key={seg.label} className="flex items-center justify-between gap-3 py-2.5 text-[15px]">
-            <span className="flex min-w-0 items-center gap-2.5">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: seg.color }} />
-              <span className="truncate">{seg.label}</span>
-            </span>
-            <span className="flex shrink-0 items-baseline gap-2 text-[13px] tabular-nums text-[var(--secondary)]">
-              <span className="w-8 text-right">{hydrated ? `${seg.percent}%` : '—'}</span>
-              <span className="text-[var(--label)]">{hydrated ? format(seg.cents) : '—'}</span>
-            </span>
+
+      <ul className="alloc-legend">
+        {(live.length ? live : groups).map((g) => (
+          <li key={g.key}>
+            <button
+              type="button"
+              className={`alloc-legend-row${active === g.key ? ' is-on' : ''}`}
+              onMouseEnter={() => setActive(g.key)}
+              onMouseLeave={() => setActive(null)}
+              onFocus={() => setActive(g.key)}
+              onBlur={() => setActive(null)}
+              onClick={() => setActive((a) => (a === g.key ? null : g.key))}
+              aria-pressed={active === g.key}
+            >
+              <span className="alloc-key" style={{ background: `var(--alloc-${g.key})` }} aria-hidden />
+              <span className="alloc-legend-label">{g.label}</span>
+              <span className="alloc-legend-pct tabular-nums">{hydrated ? `${g.percent}%` : '—'}</span>
+              <span className="alloc-legend-value tabular-nums">{hydrated ? format(g.cents) : '—'}</span>
+            </button>
+            {g.rows.length > 1 && (
+              <ul className="alloc-sub">
+                {g.rows.map((r) => (
+                  <li key={r.label}>
+                    <span className="alloc-sub-label">{r.label}</span>
+                    <span className="alloc-sub-value tabular-nums">{hydrated ? format(r.cents) : '—'}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>

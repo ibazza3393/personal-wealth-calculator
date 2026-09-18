@@ -413,7 +413,7 @@ input[type='number']::-webkit-inner-spin-button {
 
 @media (min-width: 768px) {
   .hero-stack {
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     align-items: start;
     gap: 20px;
   }
@@ -518,7 +518,6 @@ input[type='number']::-webkit-inner-spin-button {
   display: none;
 }
 
-.origin-menu-btn,
 .origin-avatar-btn {
   flex: 0 0 auto;
   width: 40px;
@@ -638,7 +637,6 @@ input[type='number']::-webkit-inner-spin-button {
     display: none;
   }
 
-  .origin-menu-btn,
   .origin-avatar-btn,
   .origin-avatar-spacer {
     display: none;
@@ -682,10 +680,34 @@ input[type='number']::-webkit-inner-spin-button {
 
 .card-stage {
   perspective: 900px;
+  width: 100%;
+  max-width: 340px;
+  flex-shrink: 0;
+}
+
+/* On a phone the card was pinned to 280px in a 390px viewport, which left it
+   marooned in the left half of the row with a hollow middle. It now takes the
+   column it sits in, and the 3D turn is dropped there — a card that swings
+   under your thumb while you read it is noise, not delight. */
+@media (max-width: 639px) {
+  .card-stage {
+    max-width: none;
+    perspective: none;
+  }
+
+  .wealth-card {
+    animation: none;
+  }
 }
 
 .wealth-card {
   container-type: inline-size;
+  position: relative;
+  aspect-ratio: 1.7;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-chrome, 20px);
+  padding: clamp(16px, 5cqw, 22px);
   transform-style: preserve-3d;
   color: var(--label);
   animation: card-turn 8s ease-in-out infinite;
@@ -3002,23 +3024,23 @@ input[type='number']::-webkit-inner-spin-button {
 
 
 /* ==========================================================================
-   Navigation drawer — the one nav surface below the desktop breakpoint.
-   Opened by the hamburger in the top bar and by More in the tab bar, so
-   there is a single mental model rather than two competing menus.
+   Navigation bottom sheet — raised by More in the tab bar and by the avatar.
+   It rises from the edge the thumb already rests on, which is why iOS puts
+   secondary navigation here rather than behind a hamburger in the far corner.
    ========================================================================== */
 
-.nd-root {
+.ns-root {
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
 }
 
-.nd-root.is-open {
+.ns-root.is-open {
   pointer-events: auto;
 }
 
-.nd-scrim {
+.ns-scrim {
   position: absolute;
   inset: 0;
   border: 0;
@@ -3029,36 +3051,46 @@ input[type='number']::-webkit-inner-spin-button {
   cursor: default;
 }
 
-.nd-root.is-open .nd-scrim {
+.ns-root.is-open .ns-scrim {
   opacity: 1;
 }
 
-.nd-panel {
+.ns-panel {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: min(340px, 88vw);
+  inset: auto 0 0 0;
+  max-height: min(86dvh, 720px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-  border-radius: 0 26px 26px 0;
+  gap: 12px;
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0;
   overflow: hidden;
-  transform: translateX(-102%);
-  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transform: translateY(102%);
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.nd-root.is-open .nd-panel {
-  transform: translateX(0);
+.ns-root.is-open .ns-panel {
+  transform: translateY(0);
+}
+
+/* The grabber is the affordance that says this can be dismissed downward. */
+.ns-grabber {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 5px;
+  margin: 0 auto 4px;
+  border-radius: 999px;
+  background: var(--separator);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nd-panel,
-  .nd-scrim {
+  .ns-panel,
+  .ns-scrim {
     transition: none;
   }
 }
 
-.nd-head {
+.ns-head {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -3066,14 +3098,14 @@ input[type='number']::-webkit-inner-spin-button {
   gap: 12px;
 }
 
-.nd-who {
+.ns-who {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.nd-avatar {
+.ns-avatar {
   flex: 0 0 auto;
   width: 40px;
   height: 40px;
@@ -3087,11 +3119,11 @@ input[type='number']::-webkit-inner-spin-button {
   font-weight: 600;
 }
 
-.nd-who-text {
+.ns-who-text {
   min-width: 0;
 }
 
-.nd-name {
+.ns-name {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -3100,7 +3132,7 @@ input[type='number']::-webkit-inner-spin-button {
   text-overflow: ellipsis;
 }
 
-.nd-email {
+.ns-email {
   font-size: 12px;
   color: var(--secondary);
   white-space: nowrap;
@@ -3108,7 +3140,7 @@ input[type='number']::-webkit-inner-spin-button {
   text-overflow: ellipsis;
 }
 
-.nd-close {
+.ns-close {
   flex: 0 0 auto;
   width: 36px;
   height: 36px;
@@ -3124,7 +3156,7 @@ input[type='number']::-webkit-inner-spin-button {
 
 /* The list scrolls, not the panel: settings and the sign-out row stay pinned
    to the bottom edge on a short screen instead of falling below the fold. */
-.nd-nav {
+.ns-nav {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
@@ -3133,13 +3165,19 @@ input[type='number']::-webkit-inner-spin-button {
   gap: 12px;
 }
 
-.nd-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* Two columns: nine destinations fit without the list scrolling, which is
+   what left a row sliced in half at the fold. */
+.ns-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
 }
 
-.nd-group-label {
+.ns-group-label {
+  grid-column: 1 / -1;
+}
+
+.ns-group-label {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -3148,23 +3186,32 @@ input[type='number']::-webkit-inner-spin-button {
   padding: 0 10px 4px;
 }
 
-.nd-link {
+.ns-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 44px;
-  padding: 0 10px;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 12px;
   border-radius: 14px;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--label);
+  background: color-mix(in srgb, var(--elevated) 55%, transparent);
+  border: 1px solid var(--separator);
+  min-width: 0;
 }
 
-.nd-link.is-active {
+.ns-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ns-link.is-active {
   background: var(--glass-text);
   font-weight: 600;
 }
 
-.nd-settings {
+.ns-settings {
   flex: 0 0 auto;
   padding-top: 12px;
   border-top: 1px solid var(--separator);
@@ -3173,13 +3220,13 @@ input[type='number']::-webkit-inner-spin-button {
   gap: 12px;
 }
 
-.nd-field {
+.ns-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.nd-field > span {
+.ns-field > span {
   font-size: 13px;
   color: var(--secondary);
   padding-left: 2px;
@@ -3187,7 +3234,7 @@ input[type='number']::-webkit-inner-spin-button {
 
 /* 44px targets and 16px text: below 16px iOS Safari zooms the page on focus,
    which is what made the old top-bar selects feel broken as well as small. */
-.nd-field select {
+.ns-field select {
   height: 44px;
   width: 100%;
   border-radius: 12px;
@@ -3198,7 +3245,7 @@ input[type='number']::-webkit-inner-spin-button {
   font-size: 16px;
 }
 
-.nd-actions {
+.ns-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3207,7 +3254,7 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 @media (min-width: 768px) {
-  .nd-root {
+  .ns-root {
     display: none;
   }
 }
@@ -3247,22 +3294,57 @@ input[type='number']::-webkit-inner-spin-button {
 
 .wealth-card-inner {
   position: relative;
-  display: flex;
+  display: grid;
   height: 100%;
-  flex-direction: column;
-  justify-content: space-between;
+  grid-template-rows: auto 1fr auto;
   gap: 8px;
 }
 
+.wealth-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--secondary);
+}
+
+.wealth-card-brand {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+/* The amount sits on the optical centre of the card, not on its floor. */
 .wealth-card-foot {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
   min-width: 0;
 }
 
+.wealth-card-split {
+  display: flex;
+  gap: clamp(16px, 6cqw, 28px);
+  padding-top: 8px;
+  border-top: 1px solid var(--separator);
+}
+
+.wealth-card-split dt {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tertiary);
+}
+
+.wealth-card-split dd {
+  margin-top: 1px;
+  font-size: clamp(12px, 3.6cqw, 14px);
+  font-weight: 500;
+  color: var(--secondary);
+}
+
 .wealth-card-amount {
-  font-size: clamp(22px, 7cqw, 30px);
+  font-size: clamp(24px, 9cqw, 38px);
   line-height: 1.1;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -3273,7 +3355,223 @@ input[type='number']::-webkit-inner-spin-button {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: clamp(12px, 3.4cqw, 14px);
   line-height: 1.2;
   color: var(--secondary);
+}
+
+/* ==========================================================================
+   Allocation ring.
+
+   Four fixed groups, never more. The previous ring carried seven asset classes
+   and its palette failed validation outright — yellow against orange measured
+   ΔE 13.3 for normal vision, below the 15 floor, and three hues sat outside the
+   lightness band. Cutting to four groups is what made a passing palette
+   possible; the per-class detail moved to labelled sub-rows.
+
+   Both palettes below pass every check of scripts/validate_palette.js under
+   --pairs all (ring order is fixed, but all-pairs is the stricter bar):
+   lightness band, chroma floor, CVD separation, normal-vision floor and
+   contrast against their own surface.
+   ========================================================================== */
+
+:root {
+  --alloc-cash: #2474cf;
+  --alloc-invest: #a44700;
+  --alloc-property: #8a1e66;
+  --alloc-other: #009472;
+}
+
+.dark {
+  --alloc-cash: #8a82e9;
+  --alloc-invest: #b55d00;
+  --alloc-property: #b04385;
+  --alloc-other: #00a584;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --alloc-cash: #8a82e9;
+    --alloc-invest: #b55d00;
+    --alloc-property: #b04385;
+    --alloc-other: #00a584;
+  }
+}
+
+.alloc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.alloc-ring {
+  position: relative;
+  width: 208px;
+  height: 208px;
+  flex-shrink: 0;
+}
+
+.alloc-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.alloc-arc {
+  transition: opacity 180ms ease;
+  cursor: pointer;
+}
+
+.alloc-arc.is-dim {
+  opacity: 0.28;
+}
+
+.alloc-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  padding: 0 40px;
+}
+
+.alloc-centre-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tertiary);
+}
+
+.alloc-centre-value {
+  margin-top: 4px;
+  font-size: clamp(20px, 6vw, 26px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.alloc-centre-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--secondary);
+}
+
+.alloc-legend {
+  width: 100%;
+  min-width: 0;
+}
+
+.alloc-legend > li + li {
+  border-top: 1px solid var(--separator);
+}
+
+/* Every group is directly labelled with its name, share and amount, so the
+   colour is a cross-reference to the ring rather than the only way to read it. */
+.alloc-legend-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 2px;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.alloc-legend-row.is-on {
+  background: var(--glass-text);
+}
+
+.alloc-key {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.alloc-legend-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alloc-legend-pct {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--secondary);
+  width: 38px;
+  text-align: right;
+}
+
+.alloc-legend-value {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.alloc-sub {
+  padding: 0 2px 8px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alloc-sub li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--secondary);
+}
+
+.alloc-sub-value {
+  color: var(--label);
+}
+
+@media (min-width: 640px) {
+  .alloc {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .alloc-ring {
+    width: 232px;
+    height: 232px;
+    position: sticky;
+    top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alloc-arc {
+    transition: none;
+  }
+}
+
+/* Provenance on a priced holding: marked to market, or a number you typed. */
+.price-note {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--tertiary);
+}
+
+.price-note.is-live {
+  color: var(--green, #30d158);
 }

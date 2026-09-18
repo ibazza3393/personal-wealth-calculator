@@ -94,6 +94,7 @@ export function PricedRow({
   symbol,
   units,
   liveLabel,
+  priceNote,
   fallbackCents,
   tickerPlaceholder,
   unitLabel,
@@ -109,6 +110,7 @@ export function PricedRow({
   symbol: string;
   units: number;
   liveLabel: string;
+  priceNote: { text: string; live: boolean } | null;
   fallbackCents: number;
   tickerPlaceholder: string;
   unitLabel: string;
@@ -158,7 +160,12 @@ export function PricedRow({
       </div>
       <div className="text-right">
         {units ? (
-          <p className="text-[17px] leading-[22px] tabular-nums tracking-[-0.43px]">{liveLabel}</p>
+          <>
+            <p className="text-[17px] leading-[22px] tabular-nums tracking-[-0.43px]">{liveLabel}</p>
+            {priceNote && (
+              <p className={`price-note${priceNote.live ? ' is-live' : ''}`}>{priceNote.text}</p>
+            )}
+          </>
         ) : (
           <CurrencyInput
             cents={fallbackCents}
@@ -192,6 +199,7 @@ export function HoldingsGroup({
   unitLabel = 'sh',
   currency,
   liveLabel,
+  priceNote,
   onAdd,
   onName,
   onSymbol,
@@ -209,6 +217,7 @@ export function HoldingsGroup({
   unitLabel?: string;
   currency: CurrencyCode;
   liveLabel: (item: Holding) => string;
+  priceNote?: (item: Holding) => { text: string; live: boolean } | null;
   onAdd: () => void;
   onName: (id: string, name: string) => void;
   onSymbol: (id: string, symbol: string) => void;
@@ -230,6 +239,7 @@ export function HoldingsGroup({
                 symbol={item.symbol ?? ''}
                 units={item.units ?? 0}
                 liveLabel={liveLabel(item)}
+                priceNote={priceNote?.(item) ?? null}
                 fallbackCents={toCents(item.value)}
                 tickerPlaceholder={tickerPlaceholder}
                 unitLabel={unitLabel}
