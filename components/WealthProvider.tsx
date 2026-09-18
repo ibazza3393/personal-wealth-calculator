@@ -46,8 +46,8 @@ export function WealthProvider({ children }: { children: ReactNode }) {
   );
 
   const holdingValue = useCallback(
-    (h: WealthData['holdings'][number]) => holdingCents(h, bySymbol),
-    [bySymbol],
+    (h: WealthData['holdings'][number]) => holdingCents(h, bySymbol, data.currency),
+    [bySymbol, data.currency],
   );
 
   const ctx = useMemo(

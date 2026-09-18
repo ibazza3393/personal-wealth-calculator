@@ -1,11 +1,59 @@
 'use client';
 
+import { SectionHero, Spark } from '@/components/SectionHero';
 import { useWealth } from '@/components/WealthProvider';
 import { formatCents, toCents } from '@/lib/money';
+
+const PREVIEW = [
+  { name: 'DJIA', ticker: 'DJI', value: '$42.34k', delta: '1.78%', up: true, pts: [4, 6, 5, 8, 7, 10, 12] },
+  { name: 'NASDAQ', ticker: 'IXIC', value: '$19.20k', delta: '2.47%', up: true, pts: [5, 4, 7, 6, 9, 8, 12] },
+  { name: 'S&P 500', ticker: 'SPX', value: '$5.92k', delta: '2.47%', up: true, pts: [3, 5, 4, 7, 9, 8, 11] },
+  { name: 'VIX', ticker: 'VIX', value: '$18.96', delta: '7.83%', up: false, pts: [11, 10, 12, 9, 7, 8, 5] },
+];
 
 export default function MarketsPage() {
   const { data, quotes, quotesAsOf, quotesError, quotesLoading } = useWealth();
   const { currency } = data;
+
+  // Nothing to show until prices land — the section leads with what it will
+  // give back rather than an empty table.
+  if (quotes.length === 0) {
+    return (
+      <main className="pt-4">
+        <SectionHero
+          tone="meadow"
+          lead="Track"
+          headline="your investments"
+          sub="From crypto to index funds, get the context you need to manage your investments with clarity."
+          ctaLabel="Add your holdings"
+          ctaHref="/holdings"
+          note="Public prices only. Your holdings never leave this device."
+        >
+          <p className="sh-preview-label">Markets at a glance</p>
+          <div className="sh-grid">
+            {PREVIEW.map((m) => (
+              <div className="sh-tile" key={m.name}>
+                <Spark points={m.pts} />
+                <div className="sh-tile-row">
+                  <span className="sh-tile-name">{m.name}</span>
+                  <strong className="sh-tile-value">{m.value}</strong>
+                </div>
+                <div className="sh-tile-row sh-tile-sub">
+                  <span>{m.ticker}</span>
+                  <span className={m.up ? 'is-up' : 'is-down'}>
+                    {m.delta} {m.up ? '↗' : '↘'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionHero>
+        {quotesError && (
+          <p className="mt-4 text-center text-[13px] text-[var(--tertiary)]">{quotesError}</p>
+        )}
+      </main>
+    );
+  }
 
   return (
     <main className="pt-4">

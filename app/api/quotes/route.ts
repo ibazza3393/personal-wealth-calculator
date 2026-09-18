@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { CRYPTO_IDS, isCurrency } from '@/lib/currency';
+import { convert, fetchRates } from '@/lib/fx';
 
 export const revalidate = 60;
 
@@ -8,6 +9,9 @@ type Quote = {
   price: number;
   changePct: number | null;
   source: 'coingecko' | 'yahoo';
+  /** The currency `price` is actually in. When it differs from the requested
+   *  `vs`, conversion was not possible and callers must not treat it as `vs`. */
+  currency: string;
 };
 
 async function gecko(ids: string[], vs: string): Promise<Quote[]> {
@@ -26,6 +30,8 @@ async function gecko(ids: string[], vs: string): Promise<Quote[]> {
       price: row[vsKey],
       changePct: typeof row[`${vsKey}_24h_change`] === 'number' ? row[`${vsKey}_24h_change`] : null,
       source: 'coingecko',
+      // CoinGecko priced it in `vs` directly, so no conversion is involved.
+      currency: vs,
     });
   }
   return out;
@@ -48,18 +54,10 @@ async function yahoo(symbol: string): Promise<Quote | null> {
     price: meta.regularMarketPrice,
     changePct: typeof meta.regularMarketChangePercent === 'number' ? meta.regularMarketChangePercent : null,
     source: 'yahoo',
+    // Yahoo quotes in the listing's own currency — AIR.NZ is NZD, not USD.
+    // Assuming USD here is what double-converted every non-US ticker.
+    currency: typeof meta.currency === 'string' ? meta.currency.toUpperCase() : 'USD',
   };
-}
-
-async function fxToUsd(vs: string): Promise<number> {
-  if (vs === 'USD') return 1;
-  const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${vs}`, {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) return 1;
-  const json = (await res.json()) as { rates?: Record<string, number> };
-  const rate = json.rates?.[vs];
-  return typeof rate === 'number' && rate > 0 ? rate : 1;
 }
 
 export async function GET(request: Request) {
@@ -79,21 +77,27 @@ export async function GET(request: Request) {
   const [crypto, stocks, fx] = await Promise.all([
     gecko(geckoIds, vs),
     Promise.all(stockSyms.map((s) => yahoo(s))),
-    fxToUsd(vs),
+    fetchRates(),
   ]);
 
   const quotes: Quote[] = [...crypto];
   for (const q of stocks) {
     if (!q) continue;
-    quotes.push({
-      ...q,
-      price: vs === 'USD' ? q.price : q.price * fx,
-    });
+    const converted = convert(q.price, q.currency, vs, fx);
+    if (converted === null) {
+      // No rate for this pair. Report the native price and its real currency
+      // rather than passing an unconverted number off as `vs`.
+      quotes.push(q);
+      continue;
+    }
+    quotes.push({ ...q, price: converted, currency: vs });
   }
 
   return NextResponse.json({
     vs,
     asOf: new Date().toISOString(),
+    fxAsOf: fx.asOf,
+    fxLive: fx.live,
     quotes,
   });
 }

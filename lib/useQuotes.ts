@@ -10,6 +10,9 @@ export type Quote = {
   price: number;
   changePct: number | null;
   source: string;
+  /** The currency `price` is in. May differ from the requested display
+   *  currency when the server could not convert. */
+  currency?: string;
 };
 
 export function useQuotes(vs: CurrencyCode, symbols: string[]) {
@@ -58,12 +61,25 @@ export function useQuotes(vs: CurrencyCode, symbols: string[]) {
   return { quotes, bySymbol, asOf, error, loading };
 }
 
-export function holdingCents(holding: Holding, bySymbol: Map<string, Quote>): number {
+/**
+ * A quote is only usable for valuation when it is in the currency we are
+ * displaying. Multiplying units by a price in another currency is how a
+ * NZX ticker used to land in the totals at a US dollar figure.
+ */
+export function quoteMatches(q: Quote | undefined, displayCurrency: string): q is Quote {
+  return Boolean(q && (q.currency === undefined || q.currency === displayCurrency));
+}
+
+export function holdingCents(
+  holding: Holding,
+  bySymbol: Map<string, Quote>,
+  displayCurrency: string,
+): number {
   const symbol = holding.symbol?.toUpperCase();
   const units = holding.units ?? 0;
   if (symbol && units > 0) {
     const q = bySymbol.get(symbol);
-    if (q) return toCents(units * q.price);
+    if (quoteMatches(q, displayCurrency)) return toCents(units * q.price);
   }
   return toCents(holding.value);
 }

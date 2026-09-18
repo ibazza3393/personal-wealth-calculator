@@ -4,20 +4,35 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useSyncExternalStore } from 'react';
 import { AuthButton } from '@/components/AuthButton';
-import { SfIcon } from '@/components/SfIcon';
+import { SfIcon, type SfName } from '@/components/SfIcon';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CURRENCIES, type CurrencyCode } from '@/lib/currency';
 import { SIDEBAR_KEY } from '@/lib/types';
 import { useWealth } from '@/components/WealthProvider';
 
-const LINKS = [
-  { href: '/dashboard', label: 'Overview', icon: 'square.grid.2x2' as const },
-  { href: '/holdings', label: 'Holdings', icon: 'chart.bar' as const },
-  { href: '/connections', label: 'Connections', icon: 'link' as const },
-  { href: '/spend', label: 'Spend', icon: 'creditcard' as const },
-  { href: '/compare', label: 'Compare', icon: 'arrow.left.arrow.right' as const },
-  { href: '/markets', label: 'Markets', icon: 'chart.line.uptrend.xyaxis' as const },
+type NavLink = { href: string; label: string; icon: SfName };
+
+/** Grouped the way the portal reads: what you track, then what connects it. */
+const NAV_GROUPS: { label: string; links: NavLink[] }[] = [
+  {
+    label: 'Track',
+    links: [
+      { href: '/dashboard', label: 'Overview', icon: 'square.grid.2x2' },
+      { href: '/holdings', label: 'Holdings', icon: 'chart.bar' },
+      { href: '/spend', label: 'Spend', icon: 'creditcard' },
+      { href: '/markets', label: 'Markets', icon: 'chart.line.uptrend.xyaxis' },
+    ],
+  },
+  {
+    label: 'Plan',
+    links: [
+      { href: '/compare', label: 'Compare', icon: 'arrow.left.arrow.right' },
+      { href: '/connections', label: 'Connections', icon: 'link' },
+    ],
+  },
 ];
+
+const LINKS = NAV_GROUPS.flatMap((g) => g.links);
 
 const listeners = new Set<() => void>();
 
@@ -93,20 +108,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
           <nav className="origin-side-nav" aria-label="Primary">
-            {LINKS.map((link) => {
-              const active = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`origin-side-link${active ? ' is-active' : ''}`}
-                  title={link.label}
-                >
-                  <SfIcon name={link.icon} />
-                  <span className="nav-label">{link.label}</span>
-                </Link>
-              );
-            })}
+            {NAV_GROUPS.map((group) => (
+              <div className="origin-nav-group" key={group.label}>
+                <p className="origin-nav-label nav-label">{group.label}</p>
+                {group.links.map((link) => {
+                  const active = pathname === link.href;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`origin-side-link${active ? ' is-active' : ''}`}
+                      title={link.label}
+                    >
+                      <SfIcon name={link.icon} />
+                      <span className="nav-label">{link.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
           <div className="origin-side-foot">
             <select
