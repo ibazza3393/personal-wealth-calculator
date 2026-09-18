@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWealth } from '@/components/WealthProvider';
 import { CURRENCIES, type CurrencyCode } from '@/lib/currency';
 import { formatCents, inputValueFromCents, parseDollars, toCents } from '@/lib/money';
@@ -14,6 +14,7 @@ const REGIONS = [
 ];
 
 const STEPS = ['Start', 'You', 'Own', 'Owe', 'Keep', 'Done'] as const;
+const LAST = STEPS.length - 1;
 
 function markOnboarded() {
   try {
@@ -24,10 +25,10 @@ function markOnboarded() {
 }
 
 /**
- * A large, centred money field. The app's CurrencyInput is a compact
- * right-aligned row control; onboarding wants one number per screen.
+ * Money field. Opaque on purpose: the brief puts glass around a form, never
+ * underneath it, because legibility beats the effect on an input surface.
  */
-function BigMoney({
+function MoneyField({
   cents,
   onCents,
   currency,
@@ -44,8 +45,8 @@ function BigMoney({
   const [draft, setDraft] = useState('');
 
   return (
-    <label className="ob-field">
-      <span className="ob-field-label">{label}</span>
+    <label className="obx-field">
+      <span className="obx-field-label">{label}</span>
       <input
         type="text"
         inputMode="decimal"
@@ -53,7 +54,7 @@ function BigMoney({
         spellCheck={false}
         autoFocus={autoFocus}
         aria-label={label}
-        className="ob-field-input"
+        className="obx-field-input"
         placeholder={formatCents(0, currency, 0)}
         value={focused ? draft : cents ? formatCents(cents, currency, cents % 100 === 0 ? 0 : 2) : ''}
         onFocus={() => {
@@ -70,13 +71,113 @@ function BigMoney({
   );
 }
 
+/**
+ * Step 0 preview. Same glass shell, three rotating panes — the reusable
+ * pattern from the reference, showing what the product gives back.
+ */
+function Rotator() {
+  const [pane, setPane] = useState(0);
+
+  useEffect(() => {
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    const id = window.setInterval(() => setPane((p) => (p + 1) % 3), 4200);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div>
+      <div className="obx-rotator" aria-live="off">
+        {pane === 0 && (
+          <div className="obx-pane" key="net">
+            <p className="obx-pane-label">Net worth</p>
+            <p className="obx-pane-figure">$1,284,320</p>
+            <svg className="obx-spark" viewBox="0 0 300 48" preserveAspectRatio="none" aria-hidden>
+              <defs>
+                <linearGradient id="obxFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#7fe8d6" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#7fe8d6" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0 40 L38 35 L75 37 L113 26 L150 29 L188 17 L225 21 L263 9 L300 4 L300 48 L0 48 Z"
+                fill="url(#obxFill)"
+              />
+              <path
+                d="M0 40 L38 35 L75 37 L113 26 L150 29 L188 17 L225 21 L263 9 L300 4"
+                fill="none"
+                stroke="#7fe8d6"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
+
+        {pane === 1 && (
+          <div className="obx-pane" key="alloc">
+            <p className="obx-pane-label">Allocation</p>
+            <p className="obx-pane-figure">6 asset classes</p>
+            <div className="obx-bars" aria-hidden>
+              <span style={{ width: '38%', background: '#5cb8f5' }} />
+              <span style={{ width: '24%', background: '#ffd60a' }} />
+              <span style={{ width: '18%', background: '#7fe8d6' }} />
+              <span style={{ width: '12%', background: '#a5b4fc' }} />
+              <span style={{ width: '8%', background: '#f0abfc' }} />
+            </div>
+            <div className="obx-split">
+              <div className="obx-split-row">
+                <span>Property</span>
+                <strong>$842,000</strong>
+              </div>
+              <div className="obx-split-row">
+                <span>KiwiSaver</span>
+                <strong>$186,400</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {pane === 2 && (
+          <div className="obx-pane" key="split">
+            <p className="obx-pane-label">Assets &amp; debts</p>
+            <div className="obx-split" style={{ marginTop: 10 }}>
+              <div className="obx-split-row">
+                <span>Everything you own</span>
+                <strong>$1,696,320</strong>
+              </div>
+              <div className="obx-split-row">
+                <span>Everything you owe</span>
+                <strong>−$412,000</strong>
+              </div>
+              <div className="obx-split-row">
+                <span>Net</span>
+                <strong>$1,284,320</strong>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="obx-dots" aria-hidden>
+        {[0, 1, 2].map((i) => (
+          <span key={i} className={`obx-dot${i === pane ? ' is-on' : ''}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WelcomePage() {
   const router = useRouter();
   const { data, patch, isHydrated } = useWealth();
   const [step, setStep] = useState(0);
 
-  // Retirement balance lives in holdings; onboarding edits the first one it
-  // finds so re-running the flow does not stack duplicates.
+  // Onboarding edits the rows it created rather than stacking duplicates when
+  // the flow is run a second time.
   const retirement = useMemo(
     () => data.holdings.find((h) => h.kind === 'retirement'),
     [data.holdings],
@@ -143,99 +244,138 @@ export default function WelcomePage() {
   const leftover = Math.max(0, income - spend);
   const rate = income > 0 ? Math.round((leftover / income) * 100) : 0;
 
-  const finish = () => {
+  const leave = () => {
     markOnboarded();
     router.push('/dashboard');
   };
 
-  const skip = () => {
-    markOnboarded();
-    router.push('/dashboard');
-  };
-
-  const next = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
+  const next = () => setStep((s) => Math.min(LAST, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
 
+  const HEAD = [
+    {
+      kicker: 'Welcome',
+      title: (
+        <>
+          Let&rsquo;s find your <em>real</em> number.
+        </>
+      ),
+      lede: 'Four short steps. At the end you get a net worth built from your figures — not a demo, and not a guess.',
+    },
+    {
+      kicker: 'Step 1 of 4',
+      title: (
+        <>
+          Where do you <em>pay tax?</em>
+        </>
+      ),
+      lede: 'This sets your tax rates and the currency your figures show in.',
+    },
+    {
+      kicker: 'Step 2 of 4',
+      title: (
+        <>
+          What do you <em>own?</em>
+        </>
+      ),
+      lede: 'Round numbers are fine. Leave anything blank that does not apply.',
+    },
+    {
+      kicker: 'Step 3 of 4',
+      title: (
+        <>
+          What do you <em>owe?</em>
+        </>
+      ),
+      lede: 'Debt counts against you here — that is the difference between a net worth and a brag.',
+    },
+    {
+      kicker: 'Step 4 of 4',
+      title: (
+        <>
+          What do you <em>keep?</em>
+        </>
+      ),
+      lede: 'Your savings rate drives the projection. Without it we would be making the number up.',
+    },
+    {
+      kicker: 'All set',
+      title: (
+        <>
+          Your net worth is <em>this.</em>
+        </>
+      ),
+      lede: 'Every figure stays editable, and your dashboard projection now runs off the rate you entered.',
+    },
+  ][step];
+
   return (
-    <div className="ob">
-      <header className="ob-top">
-        <span className="ob-mark">
-          <span className="ob-mark-glyph" aria-hidden>
+    <div className="obx">
+      <div className="obx-bg" aria-hidden>
+        <span className="obx-drift obx-drift-a" />
+        <span className="obx-drift obx-drift-b" />
+      </div>
+
+      <header className="obx-top">
+        <span className="obx-mark">
+          <span className="obx-mark-glyph" aria-hidden>
             N
           </span>
           Next Wealth
         </span>
-        {step < STEPS.length - 1 && (
-          <button type="button" className="ob-skip" onClick={skip}>
+        {step < LAST && (
+          <button type="button" className="obx-skip" onClick={leave}>
             Skip for now
           </button>
         )}
       </header>
 
-      <div className="ob-progress" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-label="Setup progress">
+      <div
+        className="obx-progress"
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={STEPS.length}
+        aria-valuenow={step + 1}
+        aria-label="Setup progress"
+      >
         {STEPS.map((s, i) => (
-          <span key={s} className={`ob-tick${i <= step ? ' is-on' : ''}`} />
+          <span key={s} className={`obx-tick${i <= step ? ' is-on' : ''}`} />
         ))}
       </div>
 
-      <main className="ob-stage">
-        <section key={step} className="ob-card panel liquid-glass-card">
-          {step === 0 && (
-            <>
-              <p className="ob-kicker">Welcome</p>
-              <h1 className="ob-h1">
-                Let&rsquo;s find your <em>real</em> number.
-              </h1>
-              <p className="ob-lede">
-                Four short steps. At the end you get a net worth built from your figures —
-                not a demo, and not a guess.
-              </p>
-              <ul className="ob-points">
-                <li>
-                  <strong>Nothing leaves this device.</strong> Every figure is written to your own
-                  browser storage.
-                </li>
-                <li>
-                  <strong>No bank passwords, ever.</strong> Connect accounts later through Akahu or
-                  CDR, read-only.
-                </li>
-                <li>
-                  <strong>Change anything later.</strong> Nothing here is locked in.
-                </li>
-              </ul>
-            </>
-          )}
+      <main className="obx-stage">
+        {/* Headline sits directly on the drifting background — no card. */}
+        <div className="obx-head">
+          <p className="obx-kicker">{HEAD.kicker}</p>
+          <h1 className="obx-h1">{HEAD.title}</h1>
+          <p className="obx-lede">{HEAD.lede}</p>
+        </div>
+
+        {/* One glass shell; only the contents change between beats. */}
+        <section key={step} className="obx-card glass-md">
+          {step === 0 && <Rotator />}
 
           {step === 1 && (
             <>
-              <p className="ob-kicker">Step 1 of 4</p>
-              <h1 className="ob-h1">
-                Where do you <em>pay tax?</em>
-              </h1>
-              <p className="ob-lede">This sets your tax rates and the currency your figures show in.</p>
-              <div className="ob-segments">
+              <div className="obx-segments">
                 {REGIONS.map((r) => (
                   <button
                     key={r.code}
                     type="button"
-                    className={`ob-segment${data.taxRegion === r.code ? ' is-on' : ''}`}
+                    className={`obx-segment${data.taxRegion === r.code ? ' is-on' : ''}`}
                     aria-pressed={data.taxRegion === r.code}
-                    onClick={() =>
-                      patch((p) => ({ ...p, taxRegion: r.code, currency: r.currency }))
-                    }
+                    onClick={() => patch((p) => ({ ...p, taxRegion: r.code, currency: r.currency }))}
                   >
                     {r.label}
                   </button>
                 ))}
               </div>
-              <label className="ob-field ob-field-inline">
-                <span className="ob-field-label">Show amounts in</span>
+              <label className="obx-field" style={{ marginTop: 18, display: 'block' }}>
+                <span className="obx-field-label">Show amounts in</span>
                 <select
-                  className="ob-select"
+                  className="obx-select"
                   value={data.currency}
-                  onChange={(e) =>
-                    patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))
-                  }
+                  onChange={(e) => patch((p) => ({ ...p, currency: e.target.value as CurrencyCode }))}
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -249,52 +389,39 @@ export default function WelcomePage() {
 
           {step === 2 && (
             <>
-              <p className="ob-kicker">Step 2 of 4</p>
-              <h1 className="ob-h1">
-                What do you <em>own?</em>
-              </h1>
-              <p className="ob-lede">Round numbers are fine. Leave anything blank that does not apply.</p>
-              <BigMoney
+              <MoneyField
                 autoFocus
                 label="Cash in the bank"
                 currency={currency}
                 cents={toCents(data.liquidCash)}
                 onCents={(c) => patch((p) => ({ ...p, liquidCash: c / 100 }))}
               />
-              <BigMoney
+              <MoneyField
                 label="Property, at today's value"
                 currency={currency}
                 cents={toCents(data.propertyValue)}
                 onCents={(c) => patch((p) => ({ ...p, propertyValue: c / 100 }))}
               />
-              <BigMoney
+              <MoneyField
                 label={data.taxRegion === 'NZ' ? 'KiwiSaver' : 'Superannuation'}
                 currency={currency}
                 cents={toCents(retirement?.value ?? 0)}
                 onCents={setRetirement}
               />
-              <p className="ob-note">Shares and crypto come next, on the Holdings page.</p>
+              <p className="obx-note">Shares and crypto come next, on the Holdings page.</p>
             </>
           )}
 
           {step === 3 && (
             <>
-              <p className="ob-kicker">Step 3 of 4</p>
-              <h1 className="ob-h1">
-                What do you <em>owe?</em>
-              </h1>
-              <p className="ob-lede">
-                Debt counts against you here — that is the difference between a net worth and a
-                brag.
-              </p>
-              <BigMoney
+              <MoneyField
                 autoFocus
                 label="Mortgage still owing"
                 currency={currency}
                 cents={toCents(mortgage?.value ?? 0)}
                 onCents={(c) => setNamedLiability('Mortgage', c)}
               />
-              <BigMoney
+              <MoneyField
                 label="Everything else — cards, loans, student debt"
                 currency={currency}
                 cents={toCents(otherDebt?.value ?? 0)}
@@ -305,15 +432,7 @@ export default function WelcomePage() {
 
           {step === 4 && (
             <>
-              <p className="ob-kicker">Step 4 of 4</p>
-              <h1 className="ob-h1">
-                What do you <em>keep?</em>
-              </h1>
-              <p className="ob-lede">
-                Your savings rate drives the projection. Without it we would be making the number
-                up.
-              </p>
-              <BigMoney
+              <MoneyField
                 autoFocus
                 label="Take-home pay, per month"
                 currency={currency}
@@ -322,7 +441,7 @@ export default function WelcomePage() {
                   patch((p) => ({ ...p, budget: { ...p.budget, monthlyIncome: c / 100 } }))
                 }
               />
-              <BigMoney
+              <MoneyField
                 label="Everything you spend, per month"
                 currency={currency}
                 cents={toCents(spend)}
@@ -344,7 +463,7 @@ export default function WelcomePage() {
                 }
               />
               {income > 0 && (
-                <p className="ob-readout">
+                <p className="obx-readout">
                   You keep <strong>{formatCents(toCents(leftover), currency, 0)}</strong> a month —
                   a savings rate of <strong>{rate}%</strong>.
                 </p>
@@ -352,14 +471,10 @@ export default function WelcomePage() {
             </>
           )}
 
-          {step === 5 && (
+          {step === LAST && (
             <>
-              <p className="ob-kicker">All set</p>
-              <h1 className="ob-h1">
-                Your net worth is <em>this.</em>
-              </h1>
-              <p className="ob-figure">{isHydrated ? formatCents(netCents, currency, 0) : '—'}</p>
-              <div className="ob-summary">
+              <p className="obx-figure">{isHydrated ? formatCents(netCents, currency, 0) : '—'}</p>
+              <div className="obx-summary">
                 <div>
                   <span>Assets</span>
                   <strong>{formatCents(assetCents, currency, 0)}</strong>
@@ -373,30 +488,27 @@ export default function WelcomePage() {
                   <strong>{rate}%</strong>
                 </div>
               </div>
-              <p className="ob-note">
-                Every figure is editable, and the projection on your dashboard is driven by the
-                savings rate you just entered.
-              </p>
             </>
           )}
-
-          <div className="ob-actions">
-            {step > 0 && step < STEPS.length - 1 && (
-              <button type="button" className="cta cta-secondary" onClick={back}>
-                Back
-              </button>
-            )}
-            {step < STEPS.length - 1 ? (
-              <button type="button" className="cta cta-primary" onClick={next}>
-                {step === 0 ? 'Get started' : 'Continue'}
-              </button>
-            ) : (
-              <button type="button" className="cta cta-primary" onClick={finish}>
-                Open my dashboard
-              </button>
-            )}
-          </div>
         </section>
+
+        {/* The primary action is the only fully opaque object on the screen. */}
+        <div className="obx-actions">
+          {step > 0 && step < LAST && (
+            <button type="button" className="obx-back" onClick={back}>
+              Back
+            </button>
+          )}
+          {step < LAST ? (
+            <button type="button" className="obx-cta" onClick={next}>
+              {step === 0 ? 'Get started' : 'Continue'}
+            </button>
+          ) : (
+            <button type="button" className="obx-cta" onClick={leave}>
+              Open my dashboard
+            </button>
+          )}
+        </div>
       </main>
     </div>
   );
