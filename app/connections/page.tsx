@@ -1,10 +1,27 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useLedger } from '@/components/LedgerProvider';
 import { formatCents, parseDollars, toCents } from '@/lib/money';
 import { mergeAkahuLedger } from '@/lib/providers/akahu-map';
 import type { Connection, ConnectionStatus, Country, ValuationSource } from '@/lib/domain';
+
+const AKAHU_OUTCOME: Record<string, string> = {
+  connected: 'Bank connected. Hit Sync to pull your accounts and transactions.',
+  denied: 'You cancelled at your bank, so nothing was connected.',
+  state: 'That connection attempt could not be verified. Please start again.',
+  exchange: 'Akahu could not complete the connection. Please try again.',
+  store: 'Connected, but the token could not be saved. Please try again.',
+  unconfigured: 'Akahu is not configured on this deployment yet.',
+  signin: 'Please sign in first, then connect your bank.',
+};
+
+function outcomeNotice(): string | null {
+  if (typeof window === 'undefined') return null;
+  const outcome = new URLSearchParams(window.location.search).get('akahu');
+  if (!outcome) return null;
+  return AKAHU_OUTCOME[outcome] ?? 'Connection finished.';
+}
 
 const STATUS_COPY: Record<ConnectionStatus, string> = {
   active: 'Active',
@@ -21,8 +38,35 @@ export default function ConnectionsPage() {
   const [country, setCountry] = useState<Country>('NZ');
   const [source, setSource] = useState<ValuationSource>('manual');
   const [mortgageId, setMortgageId] = useState('');
-  const [notice, setNotice] = useState<string | null>(null);
+  // The callback reports its outcome in the URL, since the user arrives here
+  // by redirect from Akahu. Read during render rather than in an effect, so
+  // the message is on screen in the first frame instead of appearing late.
+  const [notice, setNotice] = useState<string | null>(() => outcomeNotice());
   const [syncing, setSyncing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [connected, setConnected] = useState<boolean | null>(null);
+
+  // Tidy the query string away so a refresh does not repeat the message.
+  useEffect(() => {
+    if (window.location.search.includes('akahu=')) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch('/api/akahu')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { connected?: boolean } | null) => {
+        if (!cancelled) setConnected(Boolean(j?.connected));
+      })
+      .catch(() => {
+        if (!cancelled) setConnected(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const mortgages = useMemo(
     () => ledger.accounts.filter((a) => a.type === 'mortgage'),
@@ -37,6 +81,33 @@ export default function ConnectionsPage() {
     );
   }
 
+  /** Ends the consent at Akahu and removes everything it produced. */
+  async function disconnectAkahu() {
+    if (
+      !window.confirm(
+        'Disconnect your bank? This ends the consent at Akahu and deletes the accounts and transactions it synced.',
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setNotice('Disconnecting…');
+    try {
+      const res = await fetch('/api/akahu/disconnect', { method: 'POST' });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        setNotice(json.error ?? 'Could not disconnect.');
+        return;
+      }
+      setConnected(false);
+      setNotice('Bank disconnected and synced data removed.');
+    } catch {
+      setNotice('Could not reach the server.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function syncAkahu() {
     setSyncing(true);
     setNotice('Syncing Akahu…');
@@ -49,6 +120,7 @@ export default function ConnectionsPage() {
         count?: number;
       };
       if (!res.ok) {
+        if ((json as { needsConnection?: boolean }).needsConnection) setConnected(false);
         setNotice(json.error ?? 'Akahu sync failed.');
         return;
       }
@@ -98,9 +170,25 @@ export default function ConnectionsPage() {
       )}
 
       <div className="mb-6 flex flex-wrap gap-2">
-        <button type="button" className="origin-btn" disabled={syncing} onClick={() => void syncAkahu()}>
-          Connect NZ bank (Akahu)
-        </button>
+        {connected ? (
+          <>
+            <button type="button" className="origin-btn" disabled={syncing} onClick={() => void syncAkahu()}>
+              {syncing ? 'Syncing…' : 'Sync now'}
+            </button>
+            <button
+              type="button"
+              className="origin-btn-ghost"
+              disabled={busy}
+              onClick={() => void disconnectAkahu()}
+            >
+              Disconnect bank
+            </button>
+          </>
+        ) : (
+          <a className="origin-btn inline-flex items-center hit px-3" href="/api/akahu/connect">
+            Connect your bank
+          </a>
+        )}
         <button type="button" className="origin-btn" onClick={fakeConnectAu}>
           Connect AU bank (CDR)
         </button>
