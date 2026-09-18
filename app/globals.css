@@ -2700,3 +2700,276 @@ input[type='number']::-webkit-inner-spin-button {
 .sh-tile-sub .is-down {
   color: #ff9a8c;
 }
+
+/* ==========================================================================
+   Charts.
+   Series colours are validated per mode (OKLCH lightness band, chroma floor,
+   CVD separation, contrast) rather than eyeballed — blue/amber clears every
+   check in both. Text keeps text tokens; only marks carry the series colour.
+   ========================================================================== */
+
+:root {
+  --fc-series: #0071e3;
+  --chart-equity: #0071e3;
+  --chart-owing: #b8860b;
+}
+
+.dark {
+  /* Dark steps are chosen for the dark band, not flipped from light. */
+  --fc-series: #0a84ff;
+  --chart-equity: #0a84ff;
+  --chart-owing: #b8860b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fc-series: #0a84ff;
+    --chart-equity: #0a84ff;
+    --chart-owing: #b8860b;
+  }
+}
+
+.light {
+  --fc-series: #0071e3;
+  --chart-equity: #0071e3;
+  --chart-owing: #b8860b;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Forecast chart ------------------------------------------------------ */
+
+.fc {
+  margin-top: 18px;
+}
+
+.fc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fc-caption {
+  font-size: var(--text-footnote);
+  color: var(--secondary);
+}
+
+.fc-toggle {
+  min-height: 44px;
+  padding: 0 8px;
+  background: none;
+  border: 0;
+  font-size: var(--text-footnote);
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.fc-plot {
+  position: relative;
+  margin-top: 6px;
+}
+
+.fc-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Recessive grid and axis — never competing with the data. */
+.fc-grid {
+  stroke: var(--separator);
+  stroke-width: 1;
+}
+
+.fc-axis {
+  stroke: var(--separator);
+  stroke-width: 1;
+}
+
+.fc-line {
+  fill: none;
+  stroke: var(--fc-series);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fc-end,
+.fc-dot {
+  fill: var(--fc-series);
+  /* 2px surface ring so the mark stays readable over the area fill. */
+  stroke: var(--elevated);
+  stroke-width: 2;
+}
+
+.fc-cross {
+  stroke: var(--secondary);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.fc-tip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--elevated);
+  border: 1px solid var(--separator);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.fc-tip span {
+  font-size: var(--text-caption-1);
+  color: var(--secondary);
+}
+
+.fc-tip strong {
+  font-size: var(--text-subheadline);
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+
+.fc-xaxis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  font-size: var(--text-caption-1);
+  color: var(--tertiary);
+}
+
+.fc-table-wrap {
+  margin-top: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.fc-table {
+  width: 100%;
+  font-size: var(--text-subheadline);
+  border-collapse: collapse;
+}
+
+.fc-table th,
+.fc-table td {
+  padding: 8px 4px;
+  text-align: left;
+  border-bottom: 1px solid var(--separator);
+}
+
+.fc-table td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fc-table thead th {
+  font-size: var(--text-caption-1);
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.fc-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* --- Equity bar ---------------------------------------------------------- */
+
+.eq-bar {
+  display: flex;
+  /* 2px surface gap between stacked segments. */
+  gap: 2px;
+  margin-top: 18px;
+  height: 14px;
+}
+
+.eq-seg {
+  border-radius: 4px;
+  min-width: 4px;
+}
+
+.eq-seg-equity {
+  background: var(--chart-equity);
+}
+
+.eq-seg-owing {
+  background: var(--chart-owing);
+}
+
+.eq-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 14px;
+}
+
+.eq-legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--text-subheadline);
+  color: var(--secondary);
+}
+
+.eq-key {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  transform: translateY(1px);
+}
+
+.eq-key-equity {
+  background: var(--chart-equity);
+}
+
+.eq-key-owing {
+  background: var(--chart-owing);
+}
+
+.eq-legend strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+
+.sh-split {
+  margin-top: 12px;
+}
+
+.sh-empty-note {
+  font-size: var(--text-subheadline);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* The tab bar carries nine destinations now. Tighten the per-item padding so
+   they all fit at 390px rather than leaving the last one half-cut. */
+@media (max-width: 440px) {
+  .origin-mobile-nav {
+    gap: 0;
+    padding: 6px 4px;
+  }
+
+  .origin-mobile-nav a {
+    padding: 0 6px;
+  }
+}
