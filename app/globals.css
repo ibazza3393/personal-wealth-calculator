@@ -1745,3 +1745,347 @@ input[type='number']::-webkit-inner-spin-button {
     background: #fff;
   }
 }
+
+/* ==========================================================================
+   Onboarding ("/welcome"). Same glass material as the app, but one question
+   per screen on a full-bleed stage — AppShell skips its chrome here too.
+   ========================================================================== */
+
+.ob {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: max(14px, var(--safe-t)) var(--safe-r) calc(24px + var(--safe-b)) var(--safe-l);
+}
+
+.ob-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(620px, 100%);
+  margin: 0 auto;
+}
+
+.ob-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-subheadline);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+}
+
+.ob-mark-glyph {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--card-grad);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.ob-skip {
+  min-height: 44px;
+  padding: 0 10px;
+  background: none;
+  border: 0;
+  font-size: var(--text-footnote);
+  color: var(--secondary);
+  cursor: pointer;
+}
+
+.ob-skip:hover {
+  color: var(--label);
+}
+
+.ob-progress {
+  display: flex;
+  gap: 6px;
+  width: min(620px, 100%);
+  margin: 14px auto 0;
+}
+
+.ob-tick {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ring-track);
+  transition: background 0.3s ease;
+}
+
+.ob-tick.is-on {
+  background: var(--blue);
+}
+
+.ob-stage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.ob-card {
+  width: min(620px, 100%);
+  padding: 32px 24px;
+  border-radius: 28px;
+  animation: ob-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ob-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ob-kicker {
+  font-size: var(--text-footnote);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.ob-h1 {
+  margin-top: 8px;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(28px, 6vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.034em;
+  font-weight: 620;
+  color: var(--label);
+  text-wrap: balance;
+}
+
+.ob-h1 em {
+  font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.ob-lede {
+  margin-top: 12px;
+  max-width: 48ch;
+  font-size: var(--text-callout);
+  line-height: 1.5;
+  color: var(--secondary);
+  text-wrap: pretty;
+}
+
+.ob-points {
+  margin-top: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.ob-points li {
+  padding-left: 16px;
+  border-left: 2px solid color-mix(in srgb, var(--blue) 40%, transparent);
+  font-size: var(--text-subheadline);
+  line-height: 1.5;
+  color: var(--secondary);
+}
+
+.ob-points strong {
+  display: block;
+  color: var(--label);
+  font-weight: 590;
+}
+
+/* --- Fields -------------------------------------------------------------- */
+
+.ob-field {
+  display: block;
+  margin-top: 20px;
+}
+
+.ob-field-label {
+  display: block;
+  font-size: var(--text-footnote);
+  color: var(--secondary);
+}
+
+.ob-field-input {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 6px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid var(--separator);
+  background: var(--elevated);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ob-field-input::placeholder {
+  color: var(--tertiary);
+  font-weight: 400;
+}
+
+.ob-field-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
+.ob-field-inline {
+  margin-top: 24px;
+}
+
+.ob-select {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid var(--separator);
+  background: var(--elevated);
+  font-size: var(--text-callout);
+  color: var(--label);
+}
+
+.ob-segments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.ob-segment {
+  min-height: 60px;
+  padding: 0 14px;
+  border-radius: 18px;
+  border: 1px solid var(--separator);
+  background: var(--elevated);
+  font-size: var(--text-callout);
+  font-weight: 560;
+  color: var(--label);
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.ob-segment:hover {
+  transform: translateY(-1px);
+}
+
+.ob-segment.is-on {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 20%, transparent);
+}
+
+.ob-note {
+  margin-top: 16px;
+  font-size: var(--text-footnote);
+  color: var(--tertiary);
+}
+
+.ob-readout {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  font-size: var(--text-subheadline);
+  color: var(--secondary);
+}
+
+.ob-readout strong {
+  color: var(--label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Result -------------------------------------------------------------- */
+
+.ob-figure {
+  margin-top: 14px;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(38px, 9vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 640;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+
+.ob-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.ob-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--label) 4%, transparent);
+}
+
+.ob-summary span {
+  font-size: var(--text-caption-1);
+  color: var(--tertiary);
+}
+
+.ob-summary strong {
+  font-size: var(--text-callout);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+
+/* --- Actions ------------------------------------------------------------- */
+
+.ob-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.ob-actions .cta {
+  flex: 1;
+  min-width: 140px;
+}
+
+@media (min-width: 560px) {
+  .ob-card {
+    padding: 44px 40px;
+  }
+
+  .ob-actions .cta {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .ob-actions {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-card,
+  .ob-segment,
+  .ob-tick {
+    animation: none !important;
+    transition: none !important;
+  }
+}

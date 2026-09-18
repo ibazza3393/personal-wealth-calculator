@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { AllocationRing } from '@/components/AllocationRing';
 import { CurrencyInput } from '@/components/CurrencyInput';
 import { ConsentBanner, LedgerStrip } from '@/components/LedgerStrip';
@@ -10,12 +12,13 @@ import { budgetTotals } from '@/lib/budget';
 import { centsToDollars, formatCents, labelPercents, toCents, widthPercents } from '@/lib/money';
 import { projectNetCents } from '@/lib/project';
 import { calcIncomeTax } from '@/lib/tax';
-import { EXPENSE_GROUPS, HOLDING_GROUPS, type HoldingKind } from '@/lib/types';
+import { EXPENSE_GROUPS, HOLDING_GROUPS, ONBOARDING_KEY, type HoldingKind } from '@/lib/types';
 
 const CASH = '#64d2ff';
 const PROPERTY = '#ffd60a';
 
 export default function OverviewPage() {
+  const router = useRouter();
   const { data, patch, isHydrated, writeError, quotes, quotesAsOf, quotesError, holdingValue } =
     useWealth();
   const {
@@ -29,6 +32,26 @@ export default function OverviewPage() {
     taxIncome,
     taxDeductions,
   } = data;
+
+  // A first-time visitor with an empty ledger goes through onboarding rather
+  // than meeting a dashboard of zeros. Runs after hydration because the answer
+  // lives in local storage.
+  useEffect(() => {
+    if (!isHydrated) return;
+    let done = true;
+    try {
+      done = window.localStorage.getItem(ONBOARDING_KEY) === 'done';
+    } catch {
+      /* Storage blocked — never trap the user in onboarding. */
+    }
+    const empty =
+      !data.liquidCash &&
+      !data.propertyValue &&
+      data.holdings.length === 0 &&
+      data.liabilities.length === 0 &&
+      !data.budget.monthlyIncome;
+    if (!done && empty) router.replace('/welcome');
+  }, [isHydrated, data, router]);
 
   if (!isHydrated) {
     return (

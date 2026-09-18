@@ -106,6 +106,7 @@ export const DEFAULT_WEALTH_DATA: WealthData = {
 export const STORAGE_KEY = 'personal-wealth-data';
 export const THEME_KEY = 'wealth-theme';
 export const SIDEBAR_KEY = 'wealth-sidebar';
+export const ONBOARDING_KEY = 'wealth-onboarded-v1';
 
 export const HOLDING_GROUPS: {
   kind: HoldingKind;
