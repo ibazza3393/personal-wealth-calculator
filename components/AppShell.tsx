@@ -62,8 +62,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  // The landing page brings its own chrome — no sidebar, topbar or tab bar.
-  if (pathname === '/') {
+  // The landing page and onboarding bring their own chrome — no sidebar,
+  // topbar or tab bar.
+  if (pathname === '/' || pathname === '/welcome') {
     return (
       <>
         {scene}
