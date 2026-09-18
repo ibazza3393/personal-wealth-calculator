@@ -3,150 +3,151 @@ import { LEGAL } from '@/lib/legal';
 
 export const metadata = {
   title: `Privacy Policy — ${LEGAL.product}`,
-  description: `How ${LEGAL.company} collects, uses and protects personal information in the ${LEGAL.product} application.`,
+  description: `What ${LEGAL.product} collects, where your figures live, and what we will never do with them.`,
 };
 
 export default function PrivacyPage() {
   return (
     <main className="lx-legal-page">
       <p className="lx-legal-kicker">Legal</p>
-      <h1>Privacy Policy</h1>
+      <h1>
+        Your money, and
+        <br />
+        <em>your</em> business.
+      </h1>
       <p className="lx-legal-meta">
-        {LEGAL.product}, an application by {LEGAL.company} · Last updated {LEGAL.lastUpdated}
+        Privacy Policy · {LEGAL.product}, by {LEGAL.company} · Updated {LEGAL.lastUpdated}
       </p>
 
       <div className="lx-legal-body">
-        <p>
-          <strong>In simple terms</strong> — {LEGAL.product} is built to help you understand what you
-          own and what you owe. The figures you enter stay on your own device. We never ask for your
-          internet banking password, we cannot move your money, and we do not sell your personal
-          information to anyone.
-        </p>
-        <p>
-          This Policy explains what we collect, why we collect it, and what you can do about it. It
-          applies to the {LEGAL.product} application and website, operated by {LEGAL.company} (
-          <strong>&ldquo;we&rdquo;</strong>, <strong>&ldquo;us&rdquo;</strong>), a company
-          incorporated in {LEGAL.jurisdiction}, and should be read together with our{' '}
-          <Link href="/terms">Terms of Use</Link>.
+        <p className="lx-legal-lede">
+          The figures you type stay on your own device. We never ask for a banking password. Nothing
+          here can move your money, and none of it is for sale. That is the whole idea, and the rest
+          of this page is the detail behind it.
         </p>
 
-        <h2>1. What personal information we collect</h2>
-        <p>We collect only what the product needs to work:</p>
+        <p>
+          This applies to the {LEGAL.product} app and website, run by {LEGAL.company} (
+          <strong>we</strong>, <strong>us</strong>), a company registered in {LEGAL.jurisdiction}.
+          Read it alongside the <Link href="/terms">Terms of Use</Link>.
+        </p>
+
+        <h2>What we collect</h2>
+        <p>Only what the product needs to work:</p>
         <ul>
           <li>
-            <strong>Account information</strong> — your name and email address, collected when you
-            create an account or sign in with Google.
+            <strong>Your account</strong> — name and email, when you create one or sign in with
+            Google.
           </li>
           <li>
-            <strong>Financial figures you enter</strong> — cash, KiwiSaver or super, shares, crypto,
-            property, debts, income and expenses, and the assumptions you set for forecasts and
-            comparisons.
+            <strong>The figures you enter</strong> — cash, KiwiSaver, super, shares, crypto,
+            property, debts, income, spending, and the assumptions behind your forecasts.
           </li>
           <li>
-            <strong>Connected account data</strong> — where you choose to connect a bank or provider,
-            the balances and account details that provider shares with us under the consent you give.
+            <strong>Connected balances</strong> — if you connect a bank, what that bank shares under
+            the consent you gave it.
           </li>
           <li>
-            <strong>Technical information</strong> — basic device, browser and log information needed
-            to keep the service secure and working.
+            <strong>The basics</strong> — device, browser and log data, to keep the service up and
+            secure.
           </li>
         </ul>
         <p>
-          We do not collect your internet banking password, and we do not ask for identity documents
-          or biometrics.
+          We do not ask for your banking password. We do not ask for identity documents, and we do
+          not collect biometrics.
         </p>
 
-        <h2>2. Where your figures are stored</h2>
+        <h2>Where your figures live</h2>
         <p>
-          The figures you type into {LEGAL.product} are written to local storage in your own browser,
-          on your own device. They are not uploaded to us unless you sign in and turn on syncing so
-          your data is available on more than one device. If you use the product without an account,
-          there is no copy of your holdings on our systems at all.
+          On your device. What you type is written to local storage in your own browser. Use{' '}
+          {LEGAL.product} without an account and there is no copy of your holdings anywhere but
+          there &mdash; no database of ours to breach.
         </p>
         <p>
-          Clearing your browser data, or using the in-app delete option, removes those figures from
-          your device. Deleting your account removes the information we hold about you, other than
-          anything we are legally required to keep.
+          Sign in and turn on syncing, and a copy is kept so your number follows you between
+          devices. Clear your browser data, or delete it in the app, and it is gone from that device.
+          Delete your account and we remove what we hold, except anything the law requires us to
+          keep.
         </p>
 
-        <h2>3. Bank and provider connections</h2>
+        <h2>Never your password</h2>
         <p>
-          Bank data reaches us through licensed intermediaries — Akahu in {LEGAL.jurisdiction} and the
-          Consumer Data Right regime in Australia. These connections are:
+          Bank data reaches us through licensed intermediaries &mdash; Akahu in {LEGAL.jurisdiction},
+          and the Consumer Data Right regime in Australia. Three things are always true of those
+          connections:
         </p>
         <ul>
           <li>
-            <strong>Consent-based</strong> — you authorise the connection with your bank or provider,
-            not with us, and you can revoke it at any time.
+            <strong>You give the consent</strong>, to your bank, and you can pull it back whenever
+            you like.
           </li>
           <li>
-            <strong>Read-only</strong> — the connection can see balances and transactions. Nothing in{' '}
-            {LEGAL.product} can move money, open accounts or make payments.
+            <strong>They are read-only.</strong> The connection sees balances. Nothing in{' '}
+            {LEGAL.product} can move money, open an account or make a payment.
           </li>
           <li>
-            <strong>Password-free</strong> — we never see, store or ask for your banking credentials.
+            <strong>Your credentials stay yours.</strong> We never see them, store them or ask for
+            them.
           </li>
         </ul>
 
-        <h2>4. How we use your personal information</h2>
-        <p>We use personal information to:</p>
+        <h2>What we do with it</h2>
+        <p>We use what we hold to:</p>
         <ul>
-          <li>provide the application, calculate your net worth, and produce your projections;</li>
-          <li>authenticate you and keep your account secure;</li>
-          <li>respond to you when you contact us for support;</li>
-          <li>fix faults, diagnose errors and improve the product; and</li>
+          <li>run the app &mdash; your net worth, your allocation, your projections;</li>
+          <li>keep you signed in and your account secure;</li>
+          <li>answer you when you get in touch;</li>
+          <li>find and fix what is broken; and</li>
           <li>meet our legal obligations in {LEGAL.jurisdiction} and Australia.</li>
         </ul>
         <p>
-          Market prices and exchange rates are fetched from public data sources. Those requests carry
-          the symbols being priced — they never carry your holdings, quantities or balances.
+          Prices and exchange rates come from public market data. Those requests carry the ticker
+          being priced and nothing else &mdash; not how much of it you hold, and not what you are
+          worth.
         </p>
 
-        <h2>5. Who we share it with</h2>
+        <h2>Who else sees it</h2>
         <p>
-          We do not sell your personal information. We share it only with service providers who help
-          us run the product — authentication and hosting providers, and the account-connection
-          intermediaries named above — and only to the extent they need it to provide that service.
-          We may also disclose information where we are required to by law.
+          We do not sell your personal information, and we do not hand it to advertisers. It reaches
+          the providers who help us run the product &mdash; hosting, authentication, and the bank
+          connection intermediaries above &mdash; and only as far as they need it to do that job. We
+          disclose it otherwise only where the law requires.
         </p>
 
-        <h2>6. Security and storage</h2>
+        <h2>How we keep it safe</h2>
         <p>
-          We use reputable cloud infrastructure providers, and information may be stored on servers
-          located outside {LEGAL.jurisdiction}. We take reasonable steps to protect personal
-          information from loss, misuse and unauthorised access, but no method of transmission or
-          storage is completely secure, and we cannot guarantee absolute security.
+          We use established cloud providers, which means some information is stored on servers
+          outside {LEGAL.jurisdiction}. We take reasonable steps to protect it from loss, misuse and
+          unauthorised access. No system is perfectly secure, and we will not pretend otherwise.
         </p>
 
-        <h2>7. Cookies</h2>
+        <h2>Cookies, briefly</h2>
         <p>
-          We use cookies and similar browser storage to keep you signed in and to remember your
-          preferences, such as your theme and display currency. You can block cookies in your browser
-          settings, but parts of the service may stop working.
+          We use cookies and browser storage to keep you signed in and to remember your preferences,
+          like your theme and display currency. Block them in your browser if you would rather
+          &mdash; parts of the app will stop working.
         </p>
 
-        <h2>8. Access, correction and deletion</h2>
+        <h2>Your call, always</h2>
         <p>
-          You have the right to ask for access to the personal information we hold about you, to ask
-          us to correct it, and to ask us to delete it. Most of it you can view, edit and delete
-          yourself inside the application. For anything else, contact us at{' '}
+          You can ask us what we hold about you, ask us to correct it, and ask us to delete it. Most
+          of it you can see, edit and delete yourself inside the app. For anything else, email{' '}
           <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>.
         </p>
 
-        <h2>9. Children</h2>
+        <h2>Under 16</h2>
         <p>
-          {LEGAL.product} is not intended for people under 16, and we do not knowingly collect their
+          {LEGAL.product} is not built for people under 16, and we do not knowingly collect their
           personal information.
         </p>
 
-        <h2>10. Changes to this Policy</h2>
+        <h2>When this changes</h2>
         <p>
-          We may update this Policy from time to time. We will post the updated version here and
-          change the &ldquo;last updated&rdquo; date above. If a change materially reduces your
-          rights, we will give you notice before it takes effect.
+          We will post the new version here and update the date above. If a change cuts into your
+          rights, we will tell you before it takes effect.
         </p>
 
-        <h2>11. Contact us</h2>
+        <h2>Talk to us</h2>
         <p>
           {LEGAL.company}
           <br />
@@ -155,7 +156,7 @@ export default function PrivacyPage() {
           <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>
         </p>
         <p>
-          This Policy is governed by the laws of {LEGAL.jurisdiction}, including the Privacy Act 2020.
+          This policy is governed by {LEGAL.jurisdiction} law, including the Privacy Act 2020.
         </p>
       </div>
 

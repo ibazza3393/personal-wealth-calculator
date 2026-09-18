@@ -201,39 +201,59 @@ export default async function LandingPage() {
 
           <div className="lx-showcase">
             <figure className="lx-ipad">
-              <div className="lx-ipad-screen">
-                <Image
-                  src="/shots/ipad-forecast-wide.png"
-                  alt="Next Wealth forecast on iPad: projected net worth over ten years, with starting net worth, contributions, growth and monthly saving."
-                  width={2732}
-                  height={2048}
-                  sizes="(max-width: 860px) 90vw, 620px"
-                  priority
-                />
+              <div className="lx-dev-body">
+                <span className="lx-dev-btn lx-ipad-power" aria-hidden />
+                <span className="lx-dev-btn lx-ipad-vol" aria-hidden />
+                <span className="lx-ipad-cam" aria-hidden />
+                <div className="lx-dev-screen">
+                  <Image
+                    src="/shots/ipad-forecast-wide.png"
+                    alt="Next Wealth forecast on iPad: projected net worth over ten years, with starting net worth, contributions, growth and monthly saving."
+                    width={2732}
+                    height={2048}
+                    sizes="(max-width: 860px) 90vw, 700px"
+                    priority
+                  />
+                  <span className="lx-dev-glare" aria-hidden />
+                </div>
               </div>
             </figure>
 
             <figure className="lx-iphone lx-iphone-front">
-              <div className="lx-iphone-screen">
-                <Image
-                  src="/shots/iphone-overview.png"
-                  alt="Next Wealth overview on iPhone: current net worth, ten-year projection, and connected account balances."
-                  width={804}
-                  height={1748}
-                  sizes="(max-width: 860px) 46vw, 230px"
-                />
+              <div className="lx-dev-body">
+                <span className="lx-dev-btn lx-iphone-action" aria-hidden />
+                <span className="lx-dev-btn lx-iphone-vol" aria-hidden />
+                <span className="lx-dev-btn lx-iphone-power" aria-hidden />
+                <span className="lx-island" aria-hidden />
+                <div className="lx-dev-screen">
+                  <Image
+                    src="/shots/iphone-overview.png"
+                    alt="Next Wealth overview on iPhone: current net worth, ten-year projection, and connected account balances."
+                    width={804}
+                    height={1748}
+                    sizes="(max-width: 860px) 52vw, 196px"
+                  />
+                  <span className="lx-dev-glare" aria-hidden />
+                </div>
               </div>
             </figure>
 
             <figure className="lx-iphone lx-iphone-back" aria-hidden>
-              <div className="lx-iphone-screen">
-                <Image
-                  src="/shots/iphone-spend.png"
-                  alt=""
-                  width={804}
-                  height={1748}
-                  sizes="(max-width: 860px) 46vw, 230px"
-                />
+              <div className="lx-dev-body">
+                <span className="lx-dev-btn lx-iphone-action" aria-hidden />
+                <span className="lx-dev-btn lx-iphone-vol" aria-hidden />
+                <span className="lx-dev-btn lx-iphone-power" aria-hidden />
+                <span className="lx-island" aria-hidden />
+                <div className="lx-dev-screen">
+                  <Image
+                    src="/shots/iphone-spend.png"
+                    alt=""
+                    width={804}
+                    height={1748}
+                    sizes="196px"
+                  />
+                  <span className="lx-dev-glare" aria-hidden />
+                </div>
               </div>
             </figure>
           </div>
