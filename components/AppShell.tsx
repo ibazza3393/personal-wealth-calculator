@@ -94,9 +94,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  // The landing, auth and onboarding pages bring their own chrome — no
+  // The landing, legal, auth and onboarding pages bring their own chrome — no
   // sidebar, topbar or tab bar.
-  if (['/', '/welcome', '/signin', '/signup'].includes(pathname)) {
+  if (['/', '/welcome', '/signin', '/signup', '/privacy', '/terms'].includes(pathname)) {
     return (
       <>
         {scene}

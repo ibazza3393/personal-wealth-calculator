@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
     // Local development without Supabase runs open, which is convenient. In
     // production it would mean a missing env var silently publishes every
     // page — so there, no auth config means no access.
-    const open = ['/', '/signin', '/signup', '/privacy'];
+    const open = ['/', '/signin', '/signup', '/privacy', '/terms'];
     if (process.env.NODE_ENV === 'production' && !open.includes(request.nextUrl.pathname)) {
       return NextResponse.json({ error: 'Auth is not configured on this host.' }, { status: 503 });
     }
@@ -40,8 +40,9 @@ export async function proxy(request: NextRequest) {
   // app previously relied on Vercel's SSO to hide it, which does not apply to
   // custom domains — so attaching one would have published every page and API
   // route, including the Akahu sync. The session is the gate now.
-  // The privacy notice has to be readable by someone deciding whether to sign
-  // up, and Akahu's reviewers read it before they have an account at all.
+  // The privacy notice and the terms have to be readable by someone deciding
+  // whether to sign up, and Akahu's reviewers read the notice before they have
+  // an account at all.
   //
   // The Akahu webhook is public for a different reason: Akahu posts to it with
   // no session, so it authenticates itself with an RSA signature over the raw
@@ -53,6 +54,7 @@ export async function proxy(request: NextRequest) {
     path === '/signin' ||
     path === '/signup' ||
     path === '/privacy' ||
+    path === '/terms' ||
     path === '/api/akahu/webhook' ||
     path.startsWith('/auth/');
 
