@@ -112,9 +112,6 @@ export interface LedgerDocument {
 
 export const LEDGER_KEY = 'wealth-ledger-v1';
 
-/** 1 NZD = this many AUD. Dated mock until a real FX feed. */
-export const FX_NZD_AUD = 0.91;
-export const FX_AS_OF = '2026-09-16';
 
 export const EMPTY_LEDGER: LedgerDocument = {
   connections: [],

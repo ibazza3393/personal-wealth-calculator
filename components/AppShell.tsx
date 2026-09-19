@@ -86,23 +86,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     listeners.forEach((fn) => fn());
   }, []);
 
-  const scene = (
-    <div className="lg-scene" aria-hidden>
-      <span className="lg-orb lg-orb-a" />
-      <span className="lg-orb lg-orb-b" />
-      <span className="lg-orb lg-orb-c" />
-    </div>
-  );
-
-  // The landing, legal, auth and onboarding pages bring their own chrome — no
-  // sidebar, topbar or tab bar.
-  if (['/', '/welcome', '/signin', '/signup', '/privacy', '/terms'].includes(pathname)) {
-    return (
-      <>
-        {scene}
-        {children}
-      </>
-    );
+  // Onboarding brings its own chrome — no sidebar, topbar or tab bar. The
+  // landing, legal and auth pages used to be listed here too; they now sit in
+  // the (site) group, outside this shell entirely, so there is nothing left to
+  // opt them out of. The background scene moved to the root layout, which is
+  // what lets those pages keep it without mounting any of this.
+  if (pathname === '/welcome') {
+    return <>{children}</>;
   }
 
   // Only the Overview greets by name; every other page states where you are.
@@ -111,7 +101,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {scene}
       <div className={`origin-shell${collapsed ? ' is-collapsed' : ''}`}>
         <aside className="origin-sidebar glass liquid-glass-chrome">
           <div className="origin-logo-row">
