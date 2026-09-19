@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { sanitizeWealthData } from '@/lib/sanitize';
 import {
@@ -26,6 +27,9 @@ type WealthContextValue = {
 
 const WealthContext = createContext<WealthContextValue | null>(null);
 
+/** Routes that render a price and therefore need the quotes feed. */
+const PRICED_ROUTES = ['/dashboard', '/holdings', '/markets', '/forecast'];
+
 export function WealthProvider({ children }: { children: ReactNode }) {
   const { value: data, setValue, clearValue, isHydrated, writeError } = useLocalStorage<WealthData>(
     STORAGE_KEY,
@@ -38,7 +42,19 @@ export function WealthProvider({ children }: { children: ReactNode }) {
     return [...new Set(['BTC', 'ETH', 'SPY', 'QQQ', 'AAPL', ...fromHoldings])];
   }, [data.holdings]);
 
-  const { quotes, bySymbol, asOf, error, loading } = useQuotes(data.currency, symbols);
+  // Only four pages show a price: the Overview ticker, Holdings, Markets, and
+  // Forecast through holdingValue. The rest — Spend, Credit, Equity, Compare,
+  // Connections, Connect — were each triggering a quotes request for a figure
+  // they never render. Kept as one list here rather than an opt-in call in
+  // every page, so a page cannot silently lose its prices by forgetting it.
+  const pathname = usePathname();
+  const wantsQuotes = PRICED_ROUTES.includes(pathname);
+
+  const { quotes, bySymbol, asOf, error, loading } = useQuotes(
+    data.currency,
+    symbols,
+    wantsQuotes,
+  );
 
   const patch = useCallback(
     (updater: (prev: WealthData) => WealthData) => setValue(updater),

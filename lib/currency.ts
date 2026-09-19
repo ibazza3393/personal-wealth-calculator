@@ -23,6 +23,3 @@ export const CRYPTO_IDS: Record<string, string> = {
   XRP: 'ripple',
 };
 
-export function isCryptoSymbol(symbol: string): boolean {
-  return symbol.toUpperCase() in CRYPTO_IDS;
-}

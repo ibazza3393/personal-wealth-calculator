@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { AppShell } from '@/components/AppShell';
-import { LedgerProvider } from '@/components/LedgerProvider';
-import { WealthProvider } from '@/components/WealthProvider';
+import { GlassScene } from '@/components/GlassScene';
 
 export const metadata: Metadata = {
   title: 'Next Wealth',
@@ -52,11 +50,13 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: ONBOARDING_BOOT }} />
       </head>
       <body className="min-h-full flex flex-col">
-        <WealthProvider>
-          <LedgerProvider>
-            <AppShell>{children}</AppShell>
-          </LedgerProvider>
-        </WealthProvider>
+        {/* The providers and the app shell used to live here, which handed
+            every route — the landing page, the privacy notice, sign-in — the
+            entire client bundle and a quotes fetch it had no use for. They
+            now wrap only the (app) group. The scene stays global because
+            every page is drawn on it, and it ships no JavaScript. */}
+        <GlassScene />
+        {children}
       </body>
     </html>
   );

@@ -48,12 +48,6 @@ export function convert(
   return (amount / fromRate) * toRate;
 }
 
-/** Convert, falling back to the unconverted amount. Only for display paths that
- *  already surface `fx.live === false` to the reader. */
-export function convertOr(amount: number, from: string, to: string, fx: FxTable): number {
-  const out = convert(amount, from, to, fx);
-  return out === null ? amount : out;
-}
 
 type FrankfurterResponse = { date?: string; base?: string; rates?: Record<string, number> };
 

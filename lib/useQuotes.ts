@@ -15,7 +15,16 @@ export type Quote = {
   currency?: string;
 };
 
-export function useQuotes(vs: CurrencyCode, symbols: string[]) {
+/**
+ * Live prices for a set of symbols.
+ *
+ * `enabled` exists because this provider sits above every page in the app
+ * group, but only four of them show a price. Without it, opening Spend or
+ * Connections fetched a market ticker nobody was going to look at. Quotes
+ * already loaded are kept when it goes false, so returning to a priced page
+ * paints immediately and refreshes behind that.
+ */
+export function useQuotes(vs: CurrencyCode, symbols: string[], enabled = true) {
   const key = symbols
     .map((s) => s.toUpperCase())
     .filter(Boolean)
@@ -27,6 +36,7 @@ export function useQuotes(vs: CurrencyCode, symbols: string[]) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
     const list = key || 'BTC,ETH,SPY,QQQ,AAPL';
     let cancelled = false;
     fetch(`/api/quotes?vs=${encodeURIComponent(vs)}&symbols=${encodeURIComponent(list)}`)
@@ -50,7 +60,7 @@ export function useQuotes(vs: CurrencyCode, symbols: string[]) {
     return () => {
       cancelled = true;
     };
-  }, [vs, key]);
+  }, [vs, key, enabled]);
 
   const bySymbol = useMemo(() => {
     const map = new Map<string, Quote>();
