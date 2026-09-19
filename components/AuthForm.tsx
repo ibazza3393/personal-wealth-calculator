@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { MIN_LENGTH, PASSWORD_RULES, checkPassword } from '@/lib/password';
 
 type Mode = 'signin' | 'signup';
 
@@ -47,6 +48,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
+  const strength = useMemo(() => checkPassword(password), [password]);
+
   async function withGoogle() {
     setError(null);
     setBusy('google');
@@ -74,6 +77,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
     try {
       const supabase = createClient();
       if (mode === 'signup') {
+        // Checked here as well as in the meter so a submit cannot get past the
+        // rules by pasting. Supabase's own password policy is the real gate;
+        // this is the part that explains itself to the user.
+        if (!strength.ok) {
+          setError('Pick a stronger password — the checklist below shows what is missing.');
+          return;
+        }
         const { data, error: err } = await supabase.auth.signUp({
           email,
           password,
@@ -169,10 +179,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
               name="password"
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               required
-              minLength={mode === 'signup' ? 8 : undefined}
+              minLength={mode === 'signup' ? MIN_LENGTH : undefined}
+              aria-describedby={mode === 'signup' ? 'password-rules' : undefined}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'}
+              placeholder={mode === 'signup' ? `At least ${MIN_LENGTH} characters` : 'Your password'}
             />
             <button
               type="button"
@@ -185,13 +196,32 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </span>
         </label>
 
+        {mode === 'signup' && password.length > 0 && (
+          <ul className="auth-rules" id="password-rules">
+            {PASSWORD_RULES.map((rule) => {
+              const met = rule.ok(password);
+              return (
+                <li key={rule.id} data-met={met || undefined}>
+                  <span aria-hidden>{met ? '✓' : '○'}</span>
+                  <span>{rule.label}</span>
+                  <span className="sr-only">{met ? ' — met' : ' — still needed'}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
         {error && (
           <p className="auth-error" role="alert">
             {error}
           </p>
         )}
 
-        <button type="submit" className="auth-submit" disabled={busy !== null}>
+        <button
+          type="submit"
+          className="auth-submit"
+          disabled={busy !== null || (mode === 'signup' && !strength.ok)}
+        >
           {busy === 'email' ? 'Working…' : copy.submit}
         </button>
       </form>

@@ -2,10 +2,18 @@ import Link from 'next/link';
 import { LEGAL } from '@/lib/legal';
 
 export const metadata = {
-  title: `Privacy Policy — ${LEGAL.product}`,
-  description: `What ${LEGAL.product} collects, where your figures live, and what we will never do with them.`,
+  title: `Privacy notice — ${LEGAL.product}`,
+  description: `What ${LEGAL.product} collects, why, how long it is kept, and how to remove it.`,
 };
 
+/**
+ * Public by design — proxy.ts lets /privacy through without a session.
+ *
+ * Akahu's accreditation review reads this before they have an account, and so
+ * does anyone deciding whether to sign up. A privacy notice behind a login is
+ * not a privacy notice. It names Akahu explicitly, which the Tier 2 review
+ * checks for, and states retention and deletion in concrete terms.
+ */
 export default function PrivacyPage() {
   return (
     <main className="lx-legal-page">
@@ -16,109 +24,112 @@ export default function PrivacyPage() {
         <em>your</em> business.
       </h1>
       <p className="lx-legal-meta">
-        Privacy Policy · {LEGAL.product}, by {LEGAL.company} · Updated {LEGAL.lastUpdated}
+        Privacy notice · {LEGAL.product}, by {LEGAL.company} · Updated {LEGAL.lastUpdated}
       </p>
 
       <div className="lx-legal-body">
         <p className="lx-legal-lede">
-          The figures you type stay on your own device. We never ask for a banking password. Nothing
-          here can move your money, and none of it is for sale. That is the whole idea, and the rest
-          of this page is the detail behind it.
+          We never see a banking password, nothing here can move your money, and none of your data
+          is for sale. What we do hold, we hold for one purpose, we encrypt it, and we delete it
+          when you say so. This is how that works, under the Privacy Act 2020.
         </p>
 
         <p>
-          This applies to the {LEGAL.product} app and website, run by {LEGAL.company} (
-          <strong>we</strong>, <strong>us</strong>), a company registered in {LEGAL.jurisdiction}.
-          Read it alongside the <Link href="/terms">Terms of Use</Link>.
+          It covers the {LEGAL.product} app and website, run by {LEGAL.company} (<strong>we</strong>,{' '}
+          <strong>us</strong>), a company registered in {LEGAL.jurisdiction}. Read it alongside the{' '}
+          <Link href="/terms">Terms of Use</Link>.
         </p>
 
         <h2>What we collect</h2>
-        <p>Only what the product needs to work:</p>
         <ul>
           <li>
-            <strong>Your account</strong> — name and email, when you create one or sign in with
-            Google.
+            <strong>Who you are.</strong> Your email address, and &mdash; if you sign in with Google
+            &mdash; the name and email Google returns. We never receive your Google password.
           </li>
           <li>
-            <strong>The figures you enter</strong> — cash, KiwiSaver, super, shares, crypto,
-            property, debts, income, spending, and the assumptions behind your forecasts.
+            <strong>Bank data, if you connect a bank.</strong> Through Akahu: your account names and
+            types, balances, and transaction history, including dates, amounts, descriptions and
+            merchant names.
           </li>
           <li>
-            <strong>Connected balances</strong> — if you connect a bank, what that bank shares under
-            the consent you gave it.
-          </li>
-          <li>
-            <strong>The basics</strong> — device, browser and log data, to keep the service up and
-            secure.
+            <strong>The figures you enter yourself.</strong> Property values, holdings, manual
+            balances, spending, and the assumptions behind your forecasts.
           </li>
         </ul>
         <p>
-          We do not ask for your banking password. We do not ask for identity documents, and we do
-          not collect biometrics.
+          We do not ask for identity documents, and we do not collect biometrics.
         </p>
 
-        <h2>Where your figures live</h2>
+        <h2>Where it lives</h2>
         <p>
-          On your device. What you type is written to local storage in your own browser. Use{' '}
-          {LEGAL.product} without an account and there is no copy of your holdings anywhere but
-          there &mdash; no database of ours to breach.
+          What you type yourself is written to local storage in your own browser. Use{' '}
+          {LEGAL.product} without connecting a bank and your figures never leave your device.
         </p>
         <p>
-          Sign in and turn on syncing, and a copy is kept so your number follows you between
-          devices. Clear your browser data, or delete it in the app, and it is gone from that device.
-          Delete your account and we remove what we hold, except anything the law requires us to
-          keep.
+          Connect a bank and the balances and transactions Akahu returns are stored on our servers
+          against your account, because the sync has to run whether or not your browser is open.
+          Every row is restricted to your account at the database level, so one account cannot read
+          another&rsquo;s.
         </p>
 
         <h2>Never your password</h2>
         <p>
-          Bank data reaches us through licensed intermediaries &mdash; Akahu in {LEGAL.jurisdiction},
-          and the Consumer Data Right regime in Australia. Three things are always true of those
-          connections:
+          We use <strong>Akahu</strong>, New Zealand&rsquo;s open finance platform, as the data
+          source and processor for bank connections. You authorise Akahu on Akahu&rsquo;s own
+          screens, and Akahu passes us read-only account information. We never see or store your
+          bank login details, and we hold no permission to move money.
         </p>
-        <ul>
-          <li>
-            <strong>You give the consent</strong>, to your bank, and you can pull it back whenever
-            you like.
-          </li>
-          <li>
-            <strong>They are read-only.</strong> The connection sees balances. Nothing in{' '}
-            {LEGAL.product} can move money, open an account or make a payment.
-          </li>
-          <li>
-            <strong>Your credentials stay yours.</strong> We never see them, store them or ask for
-            them.
-          </li>
-        </ul>
+        <p>
+          Akahu handles that data under its own privacy policy. You can see and revoke every
+          app&rsquo;s access at{' '}
+          <a href="https://my.akahu.nz" rel="noreferrer noopener" target="_blank">
+            my.akahu.nz
+          </a>
+          . In Australia, connections run under the Consumer Data Right regime on the same terms:
+          your consent, read-only, revocable by you.
+        </p>
 
-        <h2>What we do with it</h2>
-        <p>We use what we hold to:</p>
-        <ul>
-          <li>run the app &mdash; your net worth, your allocation, your projections;</li>
-          <li>keep you signed in and your account secure;</li>
-          <li>answer you when you get in touch;</li>
-          <li>find and fix what is broken; and</li>
-          <li>meet our legal obligations in {LEGAL.jurisdiction} and Australia.</li>
-        </ul>
+        <h2>Why we collect it</h2>
+        <p>
+          To show your net worth, categorise your spending, and track both over time. That is the
+          only purpose. We do not sell your data, share it with advertisers or data brokers, or use
+          it for credit assessment or marketing.
+        </p>
         <p>
           Prices and exchange rates come from public market data. Those requests carry the ticker
           being priced and nothing else &mdash; not how much of it you hold, and not what you are
           worth.
         </p>
 
-        <h2>Who else sees it</h2>
+        <h2>How long we keep it</h2>
         <p>
-          We do not sell your personal information, and we do not hand it to advertisers. It reaches
-          the providers who help us run the product &mdash; hosting, authentication, and the bank
-          connection intermediaries above &mdash; and only as far as they need it to do that job. We
-          disclose it otherwise only where the law requires.
+          Transactions are kept for <strong>24 months</strong> &mdash; a year of history plus a year
+          to compare it against &mdash; and older ones are deleted automatically.
+        </p>
+        <p>
+          Revoke a bank connection and the balances and transactions from that connection are
+          deleted. Revoke all access, or delete your account, and every piece of bank data we hold
+          for you is deleted and your Akahu authorisation is revoked at the same time.
         </p>
 
-        <h2>How we keep it safe</h2>
+        <h2>How it is protected</h2>
         <p>
-          We use established cloud providers, which means some information is stored on servers
-          outside {LEGAL.jurisdiction}. We take reasonable steps to protect it from loss, misuse and
-          unauthorised access. No system is perfectly secure, and we will not pretend otherwise.
+          All traffic is encrypted in transit with TLS. Your Akahu access token is encrypted at rest
+          with AES-256-GCM under a key held only in our server environment, and is never sent to
+          your browser or included in any app download. Row-level security keeps your data to your
+          account.
+        </p>
+        <p>
+          No system is perfectly secure, and we will not pretend otherwise &mdash; but there is no
+          password of yours for anyone to take, and no ability to move money for anyone to abuse.
+        </p>
+
+        <h2>Your choices</h2>
+        <p>
+          Disconnect one bank or all of them from{' '}
+          <Link href="/connections">Connections</Link>, and delete your account and everything in it
+          from the same page. Under the Privacy Act 2020 you can also ask us for a copy of the
+          personal information we hold about you, or ask us to correct it.
         </p>
 
         <h2>Cookies, briefly</h2>
@@ -126,13 +137,6 @@ export default function PrivacyPage() {
           We use cookies and browser storage to keep you signed in and to remember your preferences,
           like your theme and display currency. Block them in your browser if you would rather
           &mdash; parts of the app will stop working.
-        </p>
-
-        <h2>Your call, always</h2>
-        <p>
-          You can ask us what we hold about you, ask us to correct it, and ask us to delete it. Most
-          of it you can see, edit and delete yourself inside the app. For anything else, email{' '}
-          <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>.
         </p>
 
         <h2>Under 16</h2>
@@ -156,7 +160,11 @@ export default function PrivacyPage() {
           <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>
         </p>
         <p>
-          This policy is governed by {LEGAL.jurisdiction} law, including the Privacy Act 2020.
+          For a privacy request or complaint, email us at that address. You can also complain to the{' '}
+          <a href="https://www.privacy.org.nz" rel="noreferrer noopener" target="_blank">
+            Office of the Privacy Commissioner
+          </a>
+          .
         </p>
       </div>
 

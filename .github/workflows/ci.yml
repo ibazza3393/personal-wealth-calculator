@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A second push to the same branch makes the first run's answer irrelevant, so
+# cancel it rather than paying for both.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Next generates the route types that `RouteContext<'/path'>` resolves
+      # to, so typecheck has to run after them or it fails on handlers that
+      # have nothing wrong with them.
+      - name: Generate route types
+        run: npx next typegen
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Build last: it is the slowest step and the one most likely to be
+      # redundant once the three above pass. It runs without Supabase or Akahu
+      # credentials on purpose — a build that needs secrets to compile is a
+      # build that cannot be checked on a fork's pull request.
+      - name: Build
+        run: npm run build
+
+  # Secrets belong to the deployment, not to the repository's source. This job
+  # fails the build if one is committed, which is cheaper than finding out from
+  # Akahu's accreditation review.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: No secrets in the tree
+        run: |
+          set -euo pipefail
+
+          if git ls-files --error-unmatch .env .env.local >/dev/null 2>&1; then
+            echo "::error::A .env file is committed. Secrets belong in the deployment environment."
+            exit 1
+          fi
+
+          # A server-only credential must never be given a NEXT_PUBLIC_ prefix:
+          # that is what inlines it into the browser bundle.
+          if git grep -nE 'NEXT_PUBLIC_[A-Z_]*(SECRET|SERVICE_ROLE|APP_SECRET|TOKEN_KEY|USER_TOKEN)' -- '*.ts' '*.tsx' '*.mjs' '*.json'; then
+            echo "::error::A server-only credential is exposed under a NEXT_PUBLIC_ name."
+            exit 1
+          fi
+
+          # Akahu and Supabase credentials must be read from process.env, never
+          # written down. Matches the name followed by a quoted literal, which
+          # covers `X = "..."`, `X: string = "..."` and `{ X: '...' }`, while a
+          # `process.env.X?.trim()` lookup has no quoted value and is ignored.
+          #
+          # No \n in the bracket expressions: grep -E reads that as the letter
+          # n, which would make `: string =` fail to match. git grep is
+          # line-based, so there is no newline to exclude anyway.
+          if git grep -nE '(AKAHU_APP_SECRET|AKAHU_TOKEN_KEY|SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY)[^"'"'"']{0,40}["'"'"'][^"'"'"']{6,}["'"'"']' \
+               -- '*.ts' '*.tsx' '*.mjs' '*.json' ':!.env.example'; then
+            echo "::error::A credential appears to be hardcoded."
+            exit 1
+          fi
+
+          echo "No committed secrets found."

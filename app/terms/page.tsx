@@ -30,7 +30,7 @@ export default function TermsPage() {
         <p>
           This is an agreement between you and {LEGAL.company}, trading as {LEGAL.product} (
           <strong>we</strong>, <strong>us</strong>), covering the {LEGAL.product} app and services.
-          Using it means you accept these terms and our <Link href="/privacy">Privacy Policy</Link>.
+          Using it means you accept these terms and our <Link href="/privacy">Privacy notice</Link>.
         </p>
         <p>
           We may revise them. New terms take effect when posted here, except where a change cuts into
@@ -61,9 +61,11 @@ export default function TermsPage() {
 
         <h2>Your figures are yours</h2>
         <p>
-          They live in your browser unless you sign in and switch on syncing. We do not sell them and
-          we do not market off them. You can delete them yourself, any time. The detail is in the{' '}
-          <Link href="/privacy">Privacy Policy</Link>.
+          What you type lives in your browser. What a connected bank returns is stored against your
+          account so the sync can run without you. We do not sell any of it and we do not market off
+          it, and you can delete the lot yourself &mdash; a connection, or the whole account &mdash;
+          from <Link href="/connections">Connections</Link>. The detail is in the{' '}
+          <Link href="/privacy">Privacy notice</Link>.
         </p>
 
         <h2>Connections are read-only</h2>

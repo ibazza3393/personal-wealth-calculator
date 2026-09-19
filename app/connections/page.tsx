@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState, type FormEvent } from 'react';
+import { AkahuControls } from '@/components/AkahuControls';
 import { useLedger } from '@/components/LedgerProvider';
 import { formatCents, parseDollars, toCents } from '@/lib/money';
 import { mergeAkahuLedger } from '@/lib/providers/akahu-map';
@@ -13,6 +15,13 @@ const STATUS_COPY: Record<ConnectionStatus, string> = {
   error: 'Error',
   revoked: 'Revoked',
 };
+
+/**
+ * Statuses that mean the feed has stopped and the user has to act. Akahu Tier
+ * 2 asks for an alert on these rather than a quietly stale number, so they get
+ * a banner and a link back into the OAuth flow.
+ */
+const NEEDS_ACTION: ConnectionStatus[] = ['needs_reauth', 'error', 'revoked'];
 
 export default function ConnectionsPage() {
   const { ledger, isHydrated, resetMock, addProperty, patch } = useLedger();
@@ -27,6 +36,11 @@ export default function ConnectionsPage() {
   const mortgages = useMemo(
     () => ledger.accounts.filter((a) => a.type === 'mortgage'),
     [ledger.accounts],
+  );
+
+  const stale = useMemo(
+    () => ledger.connections.filter((c) => NEEDS_ACTION.includes(c.status)),
+    [ledger.connections],
   );
 
   if (!isHydrated) {
@@ -44,12 +58,20 @@ export default function ConnectionsPage() {
       const res = await fetch('/api/akahu/sync', { method: 'POST' });
       const json = (await res.json()) as {
         error?: string;
+        needsConnect?: boolean;
         connections?: Parameters<typeof mergeAkahuLedger>[1]['connections'];
         accounts?: Parameters<typeof mergeAkahuLedger>[1]['accounts'];
         count?: number;
       };
       if (!res.ok) {
-        setNotice(json.error ?? 'Akahu sync failed.');
+        // A revoked or absent grant is not a failure to retry — it needs the
+        // user to walk the connect flow again, so say that rather than
+        // offering a Sync button that cannot work.
+        setNotice(
+          json.needsConnect
+            ? (json.error ?? 'Connect a bank first.')
+            : (json.error ?? 'Akahu sync failed.'),
+        );
         return;
       }
       if (!json.connections || !json.accounts) {
@@ -62,6 +84,33 @@ export default function ConnectionsPage() {
       setNotice('Could not reach the sync endpoint.');
     } finally {
       setSyncing(false);
+    }
+  }
+
+  /** Revokes one bank at Akahu and drops what that connection produced. */
+  async function revokeConnection(id: string, name: string) {
+    setNotice(`Disconnecting ${name}…`);
+    try {
+      const res = await fetch(`/api/akahu/connections/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      const json = (await res.json()) as { error?: string; confirmedByAkahu?: boolean };
+      if (!res.ok) {
+        setNotice(json.error ?? `Could not disconnect ${name}.`);
+        return;
+      }
+      patch((prev) => ({
+        ...prev,
+        connections: prev.connections.filter((c) => c.id !== id),
+        accounts: prev.accounts.filter((a) => a.connection_id !== id),
+      }));
+      setNotice(
+        json.confirmedByAkahu
+          ? `${name} disconnected and its data deleted.`
+          : `${name}'s data was deleted, but Akahu did not confirm. Check my.akahu.nz.`,
+      );
+    } catch {
+      setNotice('Could not reach the server.');
     }
   }
 
@@ -88,8 +137,21 @@ export default function ConnectionsPage() {
   return (
     <main className="pt-4 pb-16">
       <p className="mb-4 text-[13px] text-[var(--secondary)]">
-        Single user, read-only. NZ Personal App is free on Akahu. Tokens stay in `.env.local`, never in the browser.
+        Read-only bank access through Akahu. Your access token is encrypted on our server and never
+        reaches this browser.
       </p>
+
+      {stale.length > 0 && (
+        <p className="panel mb-4 rounded-[12px] px-4 py-3 text-[13px]" role="alert">
+          {stale.length === 1
+            ? `${stale[0].institution_name} has stopped syncing.`
+            : `${stale.length} connections have stopped syncing.`}{' '}
+          <Link href="/connect" className="underline">
+            Reconnect
+          </Link>{' '}
+          to start it again.
+        </p>
+      )}
 
       {notice && (
         <p className="panel mb-4 rounded-[12px] px-4 py-3 text-[13px]" role="status">
@@ -99,7 +161,7 @@ export default function ConnectionsPage() {
 
       <div className="mb-6 flex flex-wrap gap-2">
         <button type="button" className="origin-btn" disabled={syncing} onClick={() => void syncAkahu()}>
-          Connect NZ bank (Akahu)
+          {syncing ? 'Syncing…' : 'Sync now'}
         </button>
         <button type="button" className="origin-btn" onClick={fakeConnectAu}>
           Connect AU bank (CDR)
@@ -109,7 +171,9 @@ export default function ConnectionsPage() {
         </button>
       </div>
 
-      <section className="panel overflow-hidden rounded-[20px]">
+      <AkahuControls />
+
+      <section className="panel mt-4 overflow-hidden rounded-[20px]">
         <div className="border-b border-[var(--separator)] px-5 py-3">
           <h2 className="text-[17px] font-semibold">Institutions</h2>
         </div>
@@ -124,6 +188,7 @@ export default function ConnectionsPage() {
                   connections: prev.connections.map((row) => (row.id === c.id ? { ...row, status } : row)),
                 }))
               }
+              onRevoke={() => void revokeConnection(c.id, c.institution_name)}
             />
           ))}
         </ul>
@@ -256,11 +321,16 @@ export default function ConnectionsPage() {
 function ConnectionRow({
   connection,
   onStatus,
+  onRevoke,
 }: {
   connection: Connection;
   onStatus: (status: ConnectionStatus) => void;
+  onRevoke: () => void;
 }) {
   const c = connection;
+  const [confirming, setConfirming] = useState(false);
+  const needsAction = NEEDS_ACTION.includes(c.status);
+
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--separator)] px-5 py-3 last:border-0">
       <div>
@@ -270,17 +340,45 @@ function ConnectionRow({
           {c.consent_expires_at ? ` · expires ${c.consent_expires_at.slice(0, 10)}` : ''}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className={`status-pill status-${c.status}`}>{STATUS_COPY[c.status]}</span>
+
+        {needsAction && (
+          <Link href="/connect" className="origin-btn">
+            Reconnect
+          </Link>
+        )}
+
         {c.status === 'consent_expiring' && (
           <button type="button" className="origin-btn" onClick={() => onStatus('active')}>
             Mark renewed
           </button>
         )}
-        {c.status === 'active' && c.country === 'AU' && (
-          <button type="button" className="origin-btn-ghost" onClick={() => onStatus('consent_expiring')}>
-            Simulate expiry
-          </button>
+
+        {/* Disconnecting is not undoable without the whole OAuth flow, so it
+            takes a second press rather than firing on the first. */}
+        {confirming ? (
+          <>
+            <button
+              type="button"
+              className="origin-btn"
+              onClick={() => {
+                setConfirming(false);
+                onRevoke();
+              }}
+            >
+              Confirm
+            </button>
+            <button type="button" className="origin-btn-ghost" onClick={() => setConfirming(false)}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          c.provider === 'akahu' && (
+            <button type="button" className="origin-btn-ghost" onClick={() => setConfirming(true)}>
+              Disconnect
+            </button>
+          )
         )}
       </div>
     </li>

@@ -385,7 +385,7 @@ export default async function LandingPage() {
             <Link href="/compare">Compare</Link>
             <Link href="/markets">Markets</Link>
             <Link href="/connections">Connections</Link>
-            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/privacy">Privacy notice</Link>
             <Link href="/terms">Terms of Use</Link>
           </nav>
         </div>

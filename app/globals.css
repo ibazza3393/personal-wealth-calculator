@@ -4110,6 +4110,37 @@ input[type='number']::-webkit-inner-spin-button {
   color: #ffb4ab;
 }
 
+/* Password rules. Shown only while typing a new password, so the sign-in form
+   is unchanged. Colour is doubled with the ✓/○ glyph rather than carrying the
+   met/unmet distinction alone. */
+.auth-rules {
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--glass-text-secondary);
+}
+
+.auth-rules li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.auth-rules li[data-met] {
+  color: #9be59b;
+}
+
+.auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .auth-submit {
   min-height: 54px;
   margin-top: 4px;
