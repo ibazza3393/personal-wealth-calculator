@@ -24,6 +24,18 @@ function asNum(v: unknown): number {
   return toCents(typeof v === 'number' ? v : Number(v)) / 100;
 }
 
+/**
+ * A plain ISO date (YYYY-MM-DD), or null.
+ *
+ * Checked against a real Date rather than a regex alone, so 2026-02-31 is
+ * rejected instead of stored and later rendered as 3 March.
+ */
+function asIsoDate(v: unknown): string | null {
+  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return null;
+  const d = new Date(`${v}T00:00:00Z`);
+  return Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== v ? null : v;
+}
+
 function oneOf<T extends string>(v: unknown, allowed: readonly T[], fallback: T): T {
   return typeof v === 'string' && (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
 }
@@ -174,9 +186,13 @@ export function sanitizeLedger(raw: unknown): LedgerDocument {
         currency: oneOf(r.currency, ['NZD', 'AUD', 'USD'] as const, 'NZD'),
         valuation_source: oneOf(
           r.valuation_source,
-          ['manual', 'homes', 'qv', 'corelogic', 'domain', 'other'] as const,
+          ['council', 'manual', 'homes', 'qv', 'corelogic', 'domain', 'other'] as const,
           'manual',
         ),
+        // Stored as a plain ISO date. A blank or malformed value reads as "no
+        // date" rather than today's, so an undated figure is never passed off
+        // as a fresh one.
+        valuation_date: asIsoDate(r.valuation_date),
         mortgage_account_id: typeof r.mortgage_account_id === 'string' ? r.mortgage_account_id : null,
       };
     }),

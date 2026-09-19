@@ -1,6 +1,14 @@
 import type { LedgerDocument } from './domain';
 
-/** Single-tenant fixture: NZ Akahu + AU CDR (consent expiring) + manual property. */
+/**
+ * Sample data, loaded only when someone asks for it from Connections.
+ *
+ * This used to be the initial value of every ledger, which meant a real person
+ * who signed up was shown a Grey Lynn property, an ANZ mortgage and a
+ * Commonwealth Bank account as their net worth. A financial app whose first
+ * screen is invented figures is not a rounding error — you cannot tell which
+ * numbers are yours.
+ */
 export const MOCK_LEDGER: LedgerDocument = {
   connections: [
     {
@@ -132,7 +140,8 @@ export const MOCK_LEDGER: LedgerDocument = {
       address: 'Grey Lynn, Auckland',
       estimated_value: 1180000,
       currency: 'NZD',
-      valuation_source: 'manual',
+      valuation_source: 'council',
+      valuation_date: '2024-06-01',
       mortgage_account_id: 'acc-anz-mortgage',
     },
   ],
@@ -147,3 +156,22 @@ export const MOCK_LEDGER: LedgerDocument = {
   ],
   manualLiabilities: [],
 };
+
+/**
+ * Ids unique to the sample fixture above.
+ *
+ * A ledger that still carries these was never the owner's data — it is the old
+ * default, which every visitor received whether they wanted it or not. It is
+ * cleared once on load. Ids rather than a deep compare, so a ledger the person
+ * actually edited is left alone.
+ */
+export const MOCK_MARKER_IDS = ['conn-akahu-anz', 'conn-aucdr-cba', 'prop-grey-lynn'] as const;
+
+/** True when a stored ledger is still the untouched sample fixture. */
+export function isUntouchedMock(doc: LedgerDocument): boolean {
+  const ids = new Set<string>([
+    ...doc.connections.map((c) => c.id),
+    ...doc.properties.map((p) => p.id),
+  ]);
+  return MOCK_MARKER_IDS.every((id) => ids.has(id));
+}
