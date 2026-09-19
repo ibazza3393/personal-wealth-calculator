@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { test } from 'node:test';
 import { buildSnapshot, sanitizeLedger, toAud, toNzd } from './ledger';
+import { EMPTY_LEDGER, type LedgerDocument } from './domain';
 import { FALLBACK_FX } from './fx';
-import { MOCK_LEDGER } from './mock';
+import { MOCK_LEDGER, isUntouchedMock } from './mock';
 
 const snap = buildSnapshot(MOCK_LEDGER);
 assert.equal(Math.round(snap.cash), 18420);
@@ -35,4 +37,57 @@ assert.equal(cleaned.connections[0]?.scopes, 'read_only');
 console.log('ledger tests passed', {
   net_nzd: Math.round(snap.net_worth_nzd),
   net_aud: Math.round(snap.net_worth_aud),
+});
+
+test('a property keeps a valid council valuation date', () => {
+  const doc = sanitizeLedger({
+    properties: [
+      {
+        id: 'p1',
+        address: 'Somewhere',
+        estimated_value: 900000,
+        valuation_source: 'council',
+        valuation_date: '2024-06-01',
+      },
+    ],
+  });
+  assert.equal(doc.properties[0].valuation_source, 'council');
+  assert.equal(doc.properties[0].valuation_date, '2024-06-01');
+});
+
+test('an impossible date is dropped rather than shifted', () => {
+  // new Date('2026-02-31') silently becomes 3 March. Storing that would show
+  // the owner a valuation date they never entered.
+  const doc = sanitizeLedger({
+    properties: [{ id: 'p1', address: 'X', estimated_value: 1, valuation_date: '2026-02-31' }],
+  });
+  assert.equal(doc.properties[0].valuation_date, null);
+});
+
+test('a malformed or missing date reads as no date', () => {
+  for (const bad of ['yesterday', '01/06/2024', '2024-6-1', '', undefined, 42, null]) {
+    const doc = sanitizeLedger({
+      properties: [{ id: 'p1', address: 'X', estimated_value: 1, valuation_date: bad }],
+    });
+    assert.equal(doc.properties[0].valuation_date, null, `${String(bad)} should not parse`);
+  }
+});
+
+test('an unknown valuation source falls back to manual, not council', () => {
+  // Council is a claim about a public record; nothing should acquire it by accident.
+  const doc = sanitizeLedger({
+    properties: [{ id: 'p1', address: 'X', estimated_value: 1, valuation_source: 'zillow' }],
+  });
+  assert.equal(doc.properties[0].valuation_source, 'manual');
+});
+
+test('the sample fixture is recognised, an edited ledger is not', () => {
+  assert.equal(isUntouchedMock(MOCK_LEDGER), true);
+  assert.equal(isUntouchedMock(EMPTY_LEDGER), false);
+
+  const edited: LedgerDocument = {
+    ...MOCK_LEDGER,
+    properties: MOCK_LEDGER.properties.filter((p) => p.id !== 'prop-grey-lynn'),
+  };
+  assert.equal(isUntouchedMock(edited), false);
 });

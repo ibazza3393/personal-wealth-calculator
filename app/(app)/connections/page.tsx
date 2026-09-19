@@ -23,12 +23,37 @@ const STATUS_COPY: Record<ConnectionStatus, string> = {
  */
 const NEEDS_ACTION: ConnectionStatus[] = ['needs_reauth', 'error', 'revoked'];
 
+const VALUATION_COPY: Record<ValuationSource, string> = {
+  council: 'Council CV',
+  manual: 'Own estimate',
+  homes: 'Homes.co.nz',
+  qv: 'QV',
+  corelogic: 'CoreLogic',
+  domain: 'Domain',
+  other: 'Other',
+};
+
+/**
+ * Councils revalue at least every three years, so a figure older than that has
+ * been superseded by a newer public record. Flagged rather than hidden: it is
+ * still the owner's number, it just is not the current one.
+ */
+function isStale(valuedOn: string | null): boolean {
+  if (!valuedOn) return false;
+  const set = new Date(`${valuedOn}T00:00:00Z`).getTime();
+  if (Number.isNaN(set)) return false;
+  return Date.now() - set > 3 * 365.25 * 86_400_000;
+}
+
 export default function ConnectionsPage() {
   const { ledger, isHydrated, resetMock, addProperty, patch } = useLedger();
   const [address, setAddress] = useState('');
   const [value, setValue] = useState('650000');
   const [country, setCountry] = useState<Country>('NZ');
-  const [source, setSource] = useState<ValuationSource>('manual');
+  // Council rating valuation is the default because it is the one figure here
+  // with a public source behind it.
+  const [source, setSource] = useState<ValuationSource>('council');
+  const [valuedOn, setValuedOn] = useState('');
   const [mortgageId, setMortgageId] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
@@ -128,10 +153,16 @@ export default function ConnectionsPage() {
       estimated_value: estimated,
       currency: country === 'AU' ? 'AUD' : 'NZD',
       valuation_source: source,
+      valuation_date: valuedOn || null,
       mortgage_account_id: mortgageId || null,
     });
     setAddress('');
-    setNotice('Property saved on this device.');
+    setValuedOn('');
+    setNotice(
+      source === 'council' && !valuedOn
+        ? 'Property saved. Add the valuation date so the figure can be shown as current or stale.'
+        : 'Property saved on this device.',
+    );
   }
 
   return (
@@ -257,7 +288,8 @@ export default function ConnectionsPage() {
               value={source}
               onChange={(e) => setSource(e.target.value as ValuationSource)}
             >
-              <option value="manual">Manual</option>
+              <option value="council">Council rating valuation (CV)</option>
+              <option value="manual">My own estimate</option>
               <option value="homes">Homes.co.nz</option>
               <option value="qv">QV</option>
               <option value="corelogic">CoreLogic</option>
@@ -265,6 +297,32 @@ export default function ConnectionsPage() {
               <option value="other">Other</option>
             </select>
           </label>
+          <label className="text-[13px] text-[var(--secondary)]">
+            Valued on
+            <input
+              type="date"
+              className="origin-input mt-1"
+              value={valuedOn}
+              onChange={(e) => setValuedOn(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+            />
+          </label>
+          {source === 'council' && (
+            <p className="text-[12px] text-[var(--secondary)] sm:col-span-2">
+              Your council sets a rating valuation at least every three years, and it is a public
+              record. Look yours up on your council&rsquo;s property search or at{' '}
+              <a
+                href="https://www.qv.co.nz/property-search/"
+                className="underline"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                qv.co.nz
+              </a>
+              , then enter the capital value and the date it was set. A CV is a rating figure, not a
+              market appraisal — it is usually behind what a house would sell for.
+            </p>
+          )}
           <label className="text-[13px] text-[var(--secondary)] sm:col-span-2">
             Linked mortgage
             <select className="origin-input mt-1" value={mortgageId} onChange={(e) => setMortgageId(e.target.value)}>
@@ -288,7 +346,9 @@ export default function ConnectionsPage() {
               <div>
                 <p className="text-[15px] font-medium">{p.address}</p>
                 <p className="text-[12px] text-[var(--secondary)]">
-                  {p.country} · {p.valuation_source}
+                  {p.country} · {VALUATION_COPY[p.valuation_source]}
+                  {p.valuation_date ? ` · ${p.valuation_date}` : ''}
+                  {isStale(p.valuation_date) ? ' · due a revaluation' : ''}
                   {p.mortgage_account_id ? ' · mortgage linked' : ''}
                 </p>
               </div>

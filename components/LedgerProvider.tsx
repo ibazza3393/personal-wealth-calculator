@@ -1,16 +1,20 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { LEDGER_KEY, type LedgerDocument, type Property } from '@/lib/domain';
+import { EMPTY_LEDGER, LEDGER_KEY, type LedgerDocument, type Property } from '@/lib/domain';
+
+/** Marks the one-time clearing of the old seeded-sample default. */
+const SEED_CLEARED_KEY = 'wealth-seed-cleared-v1';
 import { FALLBACK_FX, type FxTable } from '@/lib/fx';
 import { buildSnapshot, sanitizeLedger } from '@/lib/ledger';
-import { MOCK_LEDGER } from '@/lib/mock';
+import { MOCK_LEDGER, isUntouchedMock } from '@/lib/mock';
 import { useLocalStorage } from '@/lib/useLocalStorage';
 
 type LedgerContextValue = {
   ledger: LedgerDocument;
   patch: (updater: (prev: LedgerDocument) => LedgerDocument) => void;
   resetMock: () => void;
+  clearLedger: () => void;
   isHydrated: boolean;
   writeError: string | null;
   snapshot: ReturnType<typeof buildSnapshot>;
@@ -22,18 +26,48 @@ type LedgerContextValue = {
 const LedgerContext = createContext<LedgerContextValue | null>(null);
 
 export function LedgerProvider({ children }: { children: ReactNode }) {
-  const { value: ledger, setValue, isHydrated, writeError } = useLocalStorage<LedgerDocument>(
+  // An empty ledger, not the sample. Somebody who signs up sees their own
+  // figures or none — never a Grey Lynn property they do not own.
+  const { value: stored, setValue, isHydrated, writeError } = useLocalStorage<LedgerDocument>(
     LEDGER_KEY,
-    MOCK_LEDGER,
+    EMPTY_LEDGER,
     sanitizeLedger,
   );
+
+  // Browsers that already saved the old default still hold it, so it is cleared
+  // once and a flag records that it happened.
+  //
+  // The flag is the whole point. Without it this is not a migration but a
+  // standing rule that the sample fixture may never exist — which silently
+  // broke "Reset mock data": the sample was wiped in the same tick it loaded.
+  // Run once, then never interfere with what the owner chooses to store.
+  const { value: seedCleared, setValue: setSeedCleared } = useLocalStorage<boolean>(
+    SEED_CLEARED_KEY,
+    false,
+  );
+  // Gated on isHydrated. Before hydration useLocalStorage deliberately reports
+  // the initial value so SSR markup matches, so an ungated check here sees an
+  // empty ledger, finds no fixture to clear, and spends the one-time flag
+  // without doing anything — leaving the sample in place forever.
+  const clearingSeed = isHydrated && !seedCleared && isUntouchedMock(stored);
+  const ledger = clearingSeed ? EMPTY_LEDGER : stored;
+
+  useEffect(() => {
+    if (!isHydrated || seedCleared) return;
+    if (isUntouchedMock(stored)) setValue(() => EMPTY_LEDGER);
+    setSeedCleared(() => true);
+  }, [isHydrated, seedCleared, stored, setValue, setSeedCleared]);
 
   const patch = useCallback(
     (updater: (prev: LedgerDocument) => LedgerDocument) => setValue(updater),
     [setValue],
   );
 
+  /** Loads the sample figures on request, from Connections. */
   const resetMock = useCallback(() => setValue(() => MOCK_LEDGER), [setValue]);
+
+  /** Clears everything back to an empty ledger. */
+  const clearLedger = useCallback(() => setValue(() => EMPTY_LEDGER), [setValue]);
 
   const addProperty = useCallback(
     (input: Omit<Property, 'id'>) => {
@@ -69,8 +103,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   const snapshot = useMemo(() => buildSnapshot(ledger, fx), [ledger, fx]);
 
   const ctx = useMemo(
-    () => ({ ledger, patch, resetMock, isHydrated, writeError, snapshot, addProperty, fx }),
-    [ledger, patch, resetMock, isHydrated, writeError, snapshot, addProperty, fx],
+    () => ({ ledger, patch, resetMock, clearLedger, isHydrated, writeError, snapshot, addProperty, fx }),
+    [ledger, patch, resetMock, clearLedger, isHydrated, writeError, snapshot, addProperty, fx],
   );
 
   return <LedgerContext.Provider value={ctx}>{children}</LedgerContext.Provider>;

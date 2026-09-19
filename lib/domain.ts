@@ -21,7 +21,22 @@ export type AccountType =
 
 export type AssetClass = 'equity' | 'bond' | 'fund' | 'cash' | 'other';
 
-export type ValuationSource = 'manual' | 'homes' | 'qv' | 'corelogic' | 'domain' | 'other';
+/**
+ * Where a property figure came from.
+ *
+ * `council` is the rating valuation (CV) on the District Valuation Roll — the
+ * public record a council sets at least every three years under the Rating
+ * Valuations Act 1998. It is the only figure here with a public source, which
+ * is why it is named separately from a number the owner estimated.
+ */
+export type ValuationSource =
+  | 'council'
+  | 'manual'
+  | 'homes'
+  | 'qv'
+  | 'corelogic'
+  | 'domain'
+  | 'other';
 
 export type MoneyCurrency = 'NZD' | 'AUD' | 'USD';
 
@@ -67,6 +82,12 @@ export interface Property {
   estimated_value: number;
   currency: MoneyCurrency;
   valuation_source: ValuationSource;
+  /**
+   * When the figure was set, ISO date. A council revalues on a three-yearly
+   * cycle, so a CV without its date cannot be judged stale — and a four-year-old
+   * CV presented as today's net worth is a wrong number, not a rounded one.
+   */
+  valuation_date: string | null;
   mortgage_account_id: string | null;
 }
 
